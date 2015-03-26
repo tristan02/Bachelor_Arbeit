@@ -11,6 +11,7 @@ def get_contour(contours,w,h):
     max1 = 0
     i = 0
     centroide = False
+    area = 0
     for c in contours:
         if cv2.arcLength(c, True) > max1:
             max1 = cv2.arcLength(c, True)

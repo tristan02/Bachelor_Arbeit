@@ -1,13 +1,17 @@
-3
-ima/img (1).jpg
-False
-False
-False
-ima/img (4).jpg
-False
+4
+ima/img (2).jpg
+True
 False
 False
 ima/img (6).jpg
+False
+False
+False
+ima/img (8).jpg
+False
+False
+False
+ima/img (14).jpg
 False
 False
 False

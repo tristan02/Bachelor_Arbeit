@@ -12,11 +12,11 @@ from tkFileDialog import *
 from Proyecto.menus import *
 import tkMessageBox
 from Proyecto.resize import find_0_3
-from matplotlib.cbook import Null
 from matplotlib.mlab import donothing_callback
 import ttk
 from Proyecto.database import database
 import os
+from matplotlib.cbook import Null
 
 #Construccion del menus y submenus
 class menus:
@@ -38,6 +38,7 @@ class menus:
         
         filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="Load new item...", command=self.load_but)
+        filemenu.add_command(label="Load new colection...", command=self.load_but)
         filemenu.add_command(label="Load Database", command=self.load_db)
         filemenu.add_command(label="Save Database", command=self.db.save_db)
         filemenu.add_command(label="Close", command=self.close_but)        
@@ -182,6 +183,78 @@ class menus:
         path = self.get_path(b)
         self.db.load_db(path)
         self.refresh_grid()     
+        
+    # Cascades menu ------------------------------------------------------------------           
+    def _add_cascades_menu(self):
+        cascades = Menu(self._menu)
+        self._menu.add_cascade(label='Cascades', menu=cascades, underline=0)
+         
+        cascades.add_command(label='Print Hello', underline=6,
+                             accelerator='Control+H',
+                             command=lambda: self._print_it(None, 'Hello'))
+ 
+        cascades.add_command(label='Print Goodbye', underline=6,
+                             accelerator='Control+G',
+                             command=lambda: self._print_it(None, 'Goodbye'))
+ 
+        # add submenus       
+        self._add_casc_cbs(cascades)    # check buttons
+        self._add_casc_rbs(cascades)    # radio buttons
+ 
+        # bind accelerator key to a method; the bind is on ALL the
+        # applications widgets
+        self.bind_all('<Control-h>',
+                        lambda e: self._print_it(e, 'Hello'))
+        self.bind_all('<Control-g>',
+                        lambda e: self._print_it(e, 'Goodbye'))
+ 
+    def _add_casc_cbs(self, cascades):
+        # build the Cascades->Check Buttons submenu
+        check = Menu(cascades)
+        cascades.add_cascade(label='Check Buttons', underline=0,
+                               menu=check)
+         
+        self.__vars = {}
+        labels = ('Oil checked', 'Transmission checked',
+                  'Brakes checked', 'Lights checked' )
+ 
+        for item in labels:
+            self.__vars[item] = IntVar()
+            check.add_checkbutton(label=item, variable=self.__vars[item])
+             
+        # set items 1 and 3 to 'selected' state
+        check.invoke(1)
+        check.invoke(3)
+             
+        check.add_separator()
+        check.add_command(label='Show values',
+                          command=lambda lbls=labels: self._show_vars(lbls))
+                     
+    def _add_casc_rbs(self, cascades):
+        # build Cascades->Radio Buttuns subment
+        submenu = Menu(cascades)
+        cascades.add_cascade(label='Radio Buttons', underline=0,menu=submenu)
+         
+        self.__vars['size'] = StringVar()
+        self.__vars['font'] = StringVar()
+         
+        for item in (10,14,18,24,32):
+            submenu.add_radiobutton(label='{} points'.format(item),variable=self.__vars['size'])
+             
+        submenu.add_separator()
+        for item in ('Roman', 'Bold', 'Italic'):
+            submenu.add_radiobutton(label=item,
+                                    variable=self.__vars['font'])
+     
+        # set items 1 and 7 to 'selected' state
+        submenu.invoke(1)
+        submenu.invoke(7)
+             
+        submenu.add_separator()
+        submenu.add_command(label='Show values',
+                            command=lambda: self._show_vars(('size','font')))
+         
+ 
         
     
 if __name__ == '__main__':
