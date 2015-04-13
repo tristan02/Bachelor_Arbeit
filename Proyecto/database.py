@@ -13,7 +13,7 @@ from matplotlib.cbook import Null
 
 class database:
     
-    data_checked = []
+    data_collection = []
     data_unchecked = []
     
     def __init__(self):

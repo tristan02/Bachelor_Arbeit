@@ -18,18 +18,19 @@ import Dialog
 import Image, ImageTk
 import inspect
 from Tkconstants import TOP, BOTTOM, LEFT, HORIZONTAL, ACTIVE, EW, BOTH, WORD, VERTICAL, NSEW, E, W, RIGHT
+from telnetlib import theNULL
  
-class MsgPanel(ttk.Frame):
+'''class MsgPanel(ttk.Frame):
     def __init__(self, master, msgtxt):
         ttk.Frame.__init__(self, master)
         self.pack(side=TOP, fill=X)
          
         msg = self.Label(self, wraplength='4i', justify=LEFT)
         msg['text'] = ''.join(msgtxt)
-        msg.pack(fill=X, padx=5, pady=5)
+        msg.pack(fill=X, padx=5, pady=5)'''
          
-class SeeDismissPanel(ttk.Frame):
-    def __init__(self, master):
+class SeePanel(ttk.Frame):
+    def __init__(self, master,img):
         ttk.Frame.__init__(self, master)
         self.pack(side=BOTTOM, fill=X)          # resize with parent
          
@@ -37,16 +38,20 @@ class SeeDismissPanel(ttk.Frame):
         sep = ttk.Separator(orient=HORIZONTAL)
  
         # Dismiss button
+        print type(img)
+        
         im = Image.open('img.jpg')   # image file
-        imh = ImageTk.PhotoImage(im)            # handle to file
+        imh = ImageTk.PhotoImage(im)
+        print type(im)
+        # handle to file
         dismissBtn = ttk.Button(text='Dismiss', image=imh, command=self.winfo_toplevel().destroy)
         dismissBtn.image = imh                  # prevent image from being garbage collected
         dismissBtn['compound'] = LEFT           # display image to left of label text
          
         # 'See Code' button
-        im = Image.open('img.jpg')
+        im = Image.open('upload.jpg')
         imh = ImageTk.PhotoImage(im)
-        codeBtn = ttk.Button(text='See Code', image=imh, default=ACTIVE, command=lambda: CodeDialog(self.master))
+        codeBtn = ttk.Button(text='New butterfly...', image=imh, default=ACTIVE, command=lambda: CodeDialog(self.master))
         codeBtn.image = imh
         codeBtn['compound'] = LEFT
         codeBtn.focus()

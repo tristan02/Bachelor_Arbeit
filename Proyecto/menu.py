@@ -5,7 +5,7 @@ Created on 24/3/2015
 '''
 from Tkinter import *
 import ttk
-from panels import MsgPanel, SeeDismissPanel
+from panels import SeePanel
 from Tkconstants import BOTH, TOP, LEFT, BOTTOM
 import cv2
 import numpy as np
@@ -27,30 +27,44 @@ class MenuDemo(ttk.Frame):
     frame = Null
     panel = Null
     grid = Null
+    img = Null
     db = database()
      
-    def __init__(self,isapp=True, name='menudemo'):
+    def __init__(self, name='menudemo'):
         ttk.Frame.__init__(self, name=name)
         self.pack(fill=BOTH)
-        self.master.title('Menu Demo')
-        self.isapp = isapp
-        self._create_widgets()
-        self.db = database()
+        self.master.title('Buterflies Database')
+        self._create_panel()
+        self.db = database() 
+    
+    def _create_panel(self):
+        Panel = Frame(self, name='panel')
+        Panel.pack(side=TOP, fill=BOTH)
          
-    def _create_widgets(self):
-        if self.isapp:            
-            SeeDismissPanel(self)
+        msg = ["Butterflies Database"]
          
-        self._create_demo_panel()
-         
-    def _create_demo_panel(self):
-        demoPanel = Frame(self, name='demo')
-        demoPanel.pack(side=TOP, fill=BOTH)
-         
-        msg = ["Program under construction"]
-         
-        lbl = ttk.Label(demoPanel, text=''.join(msg), wraplength='4i', justify=LEFT)
+        lbl = ttk.Label(Panel, text=''.join(msg), wraplength='4i', justify=LEFT)
         lbl.pack(side=TOP, padx=5, pady=5)
+        
+        #Button collection
+        im = Image.open('upload.jpg')
+        imh = ImageTk.PhotoImage(im)
+        codeBtn = ttk.Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_coll)
+        codeBtn.image = imh
+        codeBtn['compound'] = LEFT
+        #codeBtn.focus()
+        codeBtn.grid(in_=self, row=1, column=0, sticky=E)
+        codeBtn.pack(side=LEFT)
+        
+        #Button nueva mariposa
+        im = Image.open('new.png')
+        imh = ImageTk.PhotoImage(im)
+        codeBtn = ttk.Button(text='New Butterfly...', image=imh, default=ACTIVE, command=self.load_but)
+        codeBtn.image = imh
+        codeBtn['compound'] = LEFT
+        #codeBtn.focus()
+        codeBtn.grid(in_=self, row=1, column=0, sticky=E)
+        codeBtn.pack(side=LEFT)
          
         # create statusbar
         statusBar = ttk.Frame()
@@ -92,7 +106,7 @@ class MenuDemo(ttk.Frame):
         self._menu.add_cascade(label='File', menu=filemenu, underline=0)
  
         filemenu.add_command(label='Load new item...',command=self.load_but)
-        filemenu.add_command(label="Load new colection...", command=self.load_but)
+        filemenu.add_command(label="Load new colection...", command=self.new_coll)
         filemenu.add_command(label="Load Database", command=self.load_db)
         #filemenu.add_command(label="Save Database", command=self.db.save_db)
         filemenu.add_command(label="Close", command=self.close_but)   
@@ -229,16 +243,21 @@ class MenuDemo(ttk.Frame):
         #Creamos la mariposa
         name = 'ima/' + os.path.basename(path)
         self.but_act = butterfly(i,name)
-        self.refresh_panel(self.but_act.get_pil_img())
         
         s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
         self.but_act.set_broken(s)
+        self._create_widgets(i)
         if self.db.new_but(self.but_act) == -1:
             self.refresh_grid()
             tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
         else:
             tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, aunque todavia no pa sido procesada.")
         #self.w.mainloop()
+        
+    def new_coll(self):
+        '''TODO'''
+        t = tkMessageBox.askquestion("Nombre", "Introduzca nuevo nombre de la coleccion")
+        donothing_callback()
     
     def close_but(self):
         if self.panel != Null:
