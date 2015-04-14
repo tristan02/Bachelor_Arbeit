@@ -6,7 +6,7 @@ Created on 24/3/2015
 from Tkinter import *
 import ttk
 from panels import SeePanel
-from Tkconstants import BOTH, TOP, LEFT, BOTTOM
+from Tkconstants import BOTH, TOP, LEFT, BOTTOM, RIGHT
 import cv2
 import numpy as np
 from Proyecto.butterfly import butterfly
@@ -19,6 +19,7 @@ from matplotlib.mlab import donothing_callback
 from Proyecto.database import database
 import os
 from matplotlib.cbook import Null
+from doctest import master
  
 class MenuDemo(ttk.Frame):
     
@@ -49,7 +50,7 @@ class MenuDemo(ttk.Frame):
         #Button collection
         im = Image.open('upload.jpg')
         imh = ImageTk.PhotoImage(im)
-        codeBtn = ttk.Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_coll)
+        codeBtn = ttk.Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_col)
         codeBtn.image = imh
         codeBtn['compound'] = LEFT
         #codeBtn.focus()
@@ -106,7 +107,7 @@ class MenuDemo(ttk.Frame):
         self._menu.add_cascade(label='File', menu=filemenu, underline=0)
  
         filemenu.add_command(label='Load new item...',command=self.load_but)
-        filemenu.add_command(label="Load new colection...", command=self.new_coll)
+        filemenu.add_command(label="Load new colection...", command=self.new_col)
         filemenu.add_command(label="Load Database", command=self.load_db)
         #filemenu.add_command(label="Save Database", command=self.db.save_db)
         filemenu.add_command(label="Close", command=self.close_but)   
@@ -254,10 +255,9 @@ class MenuDemo(ttk.Frame):
             tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, aunque todavia no pa sido procesada.")
         #self.w.mainloop()
         
-    def new_coll(self):
+    def new_col(self):
         '''TODO'''
-        t = tkMessageBox.askquestion("Nombre", "Introduzca nuevo nombre de la coleccion")
-        donothing_callback()
+        dialog_col()
     
     def close_but(self):
         if self.panel != Null:
@@ -370,9 +370,37 @@ class MenuDemo(ttk.Frame):
     def _you_invoked(self, value):
         # triggered when an entry in the Icons, More or Colors menu is selected
         self.bell()
-        self.__status.configure(background='SeaGreen1', foreground='black',
-                                text="You invoked the '{}' {}.".format(value[0],
-                                                                       value[1]))
+        self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
+                
+class dialog_col:
+    root = None
+    e1 = None
+    
+    def __init__(self):
+        self.root = Tk()
+        frame = Frame(self.root,name='dialog_col')
+        frame.pack()
+        
+        label = Label(frame, text="Nombre de la nueva coleccion:")        
+        label.pack(side=LEFT)
+        
+        self.e1 = Entry(frame, bd =10)
+        self.e1.pack(side = RIGHT)
+        
+        label.grid(row=0, column=0)
+        self.e1.grid(row=0, column=1)
+        
+        
+                
+        self.crear = Button(frame, text="Crear", command=self.crear)
+        self.crear.pack(side=TOP)
+        self.crear.grid(row=1)
+        self.root.mainloop()
+    def crear(self):
+        print "Nueva coleccion: " + self.e1.get() 
+        self.root.quit()
+        
+        
          
 if __name__ == '__main__':
     MenuDemo().mainloop()
