@@ -17,6 +17,7 @@ import tkMessageBox
 from Proyecto.resize import find_0_3
 from matplotlib.mlab import donothing_callback
 from Proyecto.database import database
+from Proyecto.collection import collection
 import os
 from matplotlib.cbook import Null
 from doctest import master
@@ -219,27 +220,12 @@ class MenuDemo(ttk.Frame):
             menu.add_command(label=c, background=c,
                              command=lambda c=c: self._you_invoked((c, 'color')))   
             
-    #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
-    def get_path(self,s):
-        aux = 0
-        p = ""
-        for i in s:
-            if i == "'":
-                p = s[aux+1:]
-                break
-            aux += 1
-        aux = 0
-        for i in p:
-            if i == "'":
-                p = p[:aux]
-                break
-            aux += 1
-        return p
+    
     
     #Carga una imagen deseada, crea una mariposa, la muestra, pregunta si esta rota y la guarda en la bd
     def load_but(self):
         b = str(askopenfile())
-        path = self.get_path(b)
+        path = get_path(b)
         i = np.array(Image.open(path))
         #Creamos la mariposa
         name = 'ima/' + os.path.basename(path)
@@ -257,7 +243,7 @@ class MenuDemo(ttk.Frame):
         
     def new_col(self):
         '''TODO'''
-        dialog_col()
+        self.dialog_col()
     
     def close_but(self):
         if self.panel != Null:
@@ -372,35 +358,60 @@ class MenuDemo(ttk.Frame):
         self.bell()
         self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
                 
-class dialog_col:
-    root = None
-    e1 = None
-    
-    def __init__(self):
-        self.root = Tk()
-        frame = Frame(self.root,name='dialog_col')
-        frame.pack()
+    class dialog_col:
+        root = None
+        e1 = None
+        img = Null
         
-        label = Label(frame, text="Nombre de la nueva coleccion:")        
-        label.pack(side=LEFT)
-        
-        self.e1 = Entry(frame, bd =10)
-        self.e1.pack(side = RIGHT)
-        
-        label.grid(row=0, column=0)
-        self.e1.grid(row=0, column=1)
-        
-        
+        def __init__(self):
+            self.root = Tk()
+            frame = Frame(self.root,name='dialog_col')
+            frame.pack()
+            
+            label = Label(frame, text="Nombre de la nueva coleccion:") 
+            self.e1 = Entry(frame, bd =5)
+            self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
+            self.crear = Button(frame, text="Crear", command=self.crear)
+            
+            label.pack(side=LEFT)
+            self.e1.pack(side = RIGHT)
+            self.subir_foto.pack(side=LEFT) 
+            self.crear.pack(side=RIGHT)
+            
+            label.grid(row=0, column=0)
+            self.e1.grid(row=0, column=1)
+            self.subir_foto.grid(row=1, column=0)
+            self.crear.grid(row=1, column=1)
                 
-        self.crear = Button(frame, text="Crear", command=self.crear)
-        self.crear.pack(side=TOP)
-        self.crear.grid(row=1)
-        self.root.mainloop()
-    def crear(self):
-        print "Nueva coleccion: " + self.e1.get() 
-        self.root.quit()
-        
-        
+            self.root.mainloop()
+        def crear(self):
+            n = self.e1.get()
+            col = collection(self.img,n)
+            MenuDemo.db.new_col(col)
+            self.root.quit()
+            
+        def foto_col(self):
+            f = str(askopenfile())
+            path = get_path(f)
+            self.img = np.array(Image.open(path)) 
+            
+                   
+#Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
+def get_path(s):
+    aux = 0
+    p = ""
+    for i in s:
+        if i == "'":
+            p = s[aux+1:]
+            break
+        aux += 1
+    aux = 0
+    for i in p:
+        if i == "'":
+            p = p[:aux]
+            break
+        aux += 1
+    return p
          
 if __name__ == '__main__':
     MenuDemo().mainloop()

@@ -9,12 +9,15 @@ from Proyecto.butterfly import butterfly
 import tkMessageBox
 import ImageTk, Image
 from matplotlib.cbook import Null
+from matplotlib.mlab import donothing_callback
 
 
 class database:
     
     data_collection = []
     data_unchecked = []
+    num_but = 0
+    num_col = 0
     
     def __init__(self):
         pass
@@ -32,6 +35,10 @@ class database:
             return 0
         else:
             return -1
+        
+    def new_col(self,col):
+        
+        
         
     def reescale_bd(self,d):
         for elem in self.data_unchecked:
