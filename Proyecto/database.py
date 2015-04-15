@@ -37,8 +37,26 @@ class database:
             return -1
         
     def new_col(self,col):
+        new = True
+        for elem in self.data_collection:
+            n1 = col.get_name()
+            n2 = elem.get_name()
+            if n1 == n2:
+                new = False
+        if new:        
+            self.data_collection.append(col)
+            return 0
+        else:
+            return -1
         
-        
+    def get_col(self):
+        set = ()
+        '''for elem in self.data_collection:
+            set.add(elem.get_name())'''
+        if len(self.data_collection) > 0:            
+            return ('tenemos','algunas','colecciones')
+        else:
+            return ('puto','pringau')
         
     def reescale_bd(self,d):
         for elem in self.data_unchecked:

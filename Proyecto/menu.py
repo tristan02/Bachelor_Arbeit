@@ -21,6 +21,7 @@ from Proyecto.collection import collection
 import os
 from matplotlib.cbook import Null
 from doctest import master
+from _warnings import default_action
  
 class MenuDemo(ttk.Frame):
     
@@ -30,9 +31,10 @@ class MenuDemo(ttk.Frame):
     panel = Null
     grid = Null
     img = Null
+    btn_act_but = Null
     db = database()
      
-    def __init__(self, name='menudemo'):
+    def __init__(self, name='menu'):
         ttk.Frame.__init__(self, name=name)
         self.pack(fill=BOTH)
         self.master.title('Buterflies Database')
@@ -51,22 +53,32 @@ class MenuDemo(ttk.Frame):
         #Button collection
         im = Image.open('upload.jpg')
         imh = ImageTk.PhotoImage(im)
-        codeBtn = ttk.Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_col)
-        codeBtn.image = imh
-        codeBtn['compound'] = LEFT
-        #codeBtn.focus()
-        codeBtn.grid(in_=self, row=1, column=0, sticky=E)
-        codeBtn.pack(side=LEFT)
+        btn_new_col = Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_col)
+        btn_new_col.image = imh
+        btn_new_col['compound'] = LEFT
+        btn_new_col.focus()
+        btn_new_col.grid(in_=self, row=0, column=0, sticky=E)
+        btn_new_col.pack(side=LEFT)
         
         #Button nueva mariposa
         im = Image.open('new.png')
         imh = ImageTk.PhotoImage(im)
-        codeBtn = ttk.Button(text='New Butterfly...', image=imh, default=ACTIVE, command=self.load_but)
-        codeBtn.image = imh
-        codeBtn['compound'] = LEFT
-        #codeBtn.focus()
-        codeBtn.grid(in_=self, row=1, column=0, sticky=E)
-        codeBtn.pack(side=LEFT)
+        btn_new_but = Button(name='btn_new_but', text='New Butterfly...', image=imh, default=ACTIVE, command=self.load_but)
+        btn_new_but.image = imh
+        btn_new_but['compound'] = LEFT
+        btn_new_but.focus()
+        btn_new_but.grid(in_=self, row=0, column=1, sticky=E)
+        btn_new_but.pack(side=RIGHT)
+        
+        #Frame para mariposa actual
+        im = Image.open('no-image.png')
+        imh = ImageTk.PhotoImage(im)
+        self.btn_act_but = Button(name='btn_act_but',text='Mariposa pendiente de estudio', image=imh, default=ACTIVE, command=self.edit_but)
+        self.btn_act_but.image = imh
+        self.btn_act_but['compound'] = LEFT
+        self.btn_act_but.focus()
+        self.btn_act_but.grid(in_=self, row=1, column=1)
+        self.btn_act_but.pack(side=RIGHT)        
          
         # create statusbar
         statusBar = ttk.Frame()
@@ -95,8 +107,8 @@ class MenuDemo(ttk.Frame):
          
         self._add_file_menu()
         self._add_basic_menu()
-        self._add_cascades_menu()
-        self._add_colors_menu()
+        self._add_collection_menu()
+        #self._add_colors_menu()
  
     # ================================================================================
     # Submenu routines
@@ -134,7 +146,7 @@ class MenuDemo(ttk.Frame):
                             lambda e, i=item: self._print_it(e, i))
  
     # Cascades menu ------------------------------------------------------------------           
-    def _add_cascades_menu(self):
+    def _add_collection_menu(self):
         cascades = Menu(self._menu)
         self._menu.add_cascade(label='Cascades', menu=cascades, underline=0)
          
@@ -143,7 +155,7 @@ class MenuDemo(ttk.Frame):
         cascades.add_command(label='Print Goodbye', underline=6,accelerator='Control+G',command=lambda: self._print_it(None, 'Goodbye'))
  
         # add submenus       
-        self._add_casc_cbs(cascades)    # check buttons
+        self._add_casc_but(cascades)    # check buttons
         self._add_casc_rbs(cascades)    # radio buttons
  
         # bind accelerator key to a method; the bind is on ALL the
@@ -153,7 +165,7 @@ class MenuDemo(ttk.Frame):
         self.bind_all('<Control-g>',
                         lambda e: self._print_it(e, 'Goodbye'))
  
-    def _add_casc_cbs(self, cascades):
+    def _add_casc_but(self, cascades):
         # build the Cascades->Check Buttons submenu
         check = Menu(cascades)
         cascades.add_cascade(label='Check Buttons', underline=0,menu=check)
@@ -170,8 +182,10 @@ class MenuDemo(ttk.Frame):
         check.invoke(3)
              
         check.add_separator()
-        check.add_command(label='Show values',
-                          command=lambda lbls=labels: self._show_vars(lbls))
+        check.add_command(label='Show values',command=lambda lbls=labels: self._show_vars(lbls))
+        
+    def _refresh_casc_cbs(self, cascades):
+        cascades.entryconfigure(1,'Bieeen')
                      
     def _add_casc_rbs(self, cascades):
         # build Cascades->Radio Buttuns subment
@@ -185,7 +199,11 @@ class MenuDemo(ttk.Frame):
             submenu.add_radiobutton(label='{} points'.format(item),variable=self.__vars['size'])
              
         submenu.add_separator()
-        for item in ('Roman', 'Bold', 'Italic'):
+        '''TODO'''
+        conj = self.db.get_col()
+        for i in conj:
+            print i
+        for item in conj:
             submenu.add_radiobutton(label=item,variable=self.__vars['font'])
      
         # set items 1 and 7 to 'selected' state
@@ -204,12 +222,9 @@ class MenuDemo(ttk.Frame):
          
         for item in labels:
             menu.add_command(label=item,
-                             command=lambda i=item: self._you_invoked((i, 'entry')))
+                             command=lambda i=item: self._you_invoked((i,'entry')))
              
-        menu.entryconfig(3, bitmap='questhead', compound=LEFT,
-                         command=lambda i=labels[3]:
-                                    self._you_invoked((i,
-                                                      'entry; a bitmap and a text string')))           
+        menu.entryconfig(3, bitmap='questhead', compound=LEFT,command=lambda i=labels[3]:self._you_invoked((i,'entry; a bitmap and a text string')))           
            
     # Colors menu ------------------------------------------------------------------          
     def _add_colors_menu(self):
@@ -217,8 +232,7 @@ class MenuDemo(ttk.Frame):
         self._menu.add_cascade(label='Colors', menu=menu, underline=1)
          
         for c in ('red', 'orange', 'yellow', 'green', 'blue'):
-            menu.add_command(label=c, background=c,
-                             command=lambda c=c: self._you_invoked((c, 'color')))   
+            menu.add_command(label=c, background=c,command=lambda c=c: self._you_invoked((c, 'color')))   
             
     
     
@@ -233,17 +247,20 @@ class MenuDemo(ttk.Frame):
         
         s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
         self.but_act.set_broken(s)
-        self._create_widgets(i)
         if self.db.new_but(self.but_act) == -1:
             self.refresh_grid()
             tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
         else:
-            tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, aunque todavia no pa sido procesada.")
-        #self.w.mainloop()
+            tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")
+        self.update_but_frame(self.but_act)
+        
+    def edit_but(self):
+        self.dialog_edit_but()
         
     def new_col(self):
         '''TODO'''
-        self.dialog_col()
+        self.dialog_new_col()
+        self._add_collection_menu()
     
     def close_but(self):
         if self.panel != Null:
@@ -312,7 +329,11 @@ class MenuDemo(ttk.Frame):
             panel = Label(self.frame, image=b.get_min_img() ,borderwidth=1 ).grid(row=r,column=0)
             r = r + 1
         #self.w.mainloop()
-        
+    
+    def update_but_frame(self,but):
+        im = but.get_min_img()
+        self.btn_act_but.config(image=im)
+    
     
     def load_db(self):
         b = str(askopenfile())
@@ -358,14 +379,14 @@ class MenuDemo(ttk.Frame):
         self.bell()
         self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
                 
-    class dialog_col:
+    class dialog_new_col:
         root = None
         e1 = None
         img = Null
         
         def __init__(self):
             self.root = Tk()
-            frame = Frame(self.root,name='dialog_col')
+            frame = Frame(self.root,name='dialog_new_col')
             frame.pack()
             
             label = Label(frame, text="Nombre de la nueva coleccion:") 
@@ -384,6 +405,7 @@ class MenuDemo(ttk.Frame):
             self.crear.grid(row=1, column=1)
                 
             self.root.mainloop()
+            
         def crear(self):
             n = self.e1.get()
             col = collection(self.img,n)
@@ -395,6 +417,36 @@ class MenuDemo(ttk.Frame):
             path = get_path(f)
             self.img = np.array(Image.open(path)) 
             
+    class dialog_edit_but:
+        def __init__(self):
+            self.root = Tk()
+            frame = Frame(self.root,name='dialog_edit')
+            frame.pack()
+            
+            label = Label(frame, text="Opciones:") 
+            self.e1 = Entry(frame, bd =5)
+            self.subir_foto = Button(frame, text="Eliminar mariposa", command=self.delete_but) 
+            '''TODO'''
+            self.crear = Button(frame, text="Insertar en base de datos", command=self.comparar)
+            
+            label.pack(side=LEFT)
+            self.e1.pack(side = RIGHT)
+            self.subir_foto.pack(side=LEFT) 
+            self.crear.pack(side=RIGHT)
+            
+            label.grid(row=0, column=0)
+            self.e1.grid(row=0, column=1)
+            self.subir_foto.grid(row=1, column=0)
+            self.crear.grid(row=1, column=1)
+                
+            self.root.mainloop()   
+        def delete_but(self):
+            '''TODO'''
+            donothing_callback()  
+            
+        def comparar(self):
+            '''TODO'''
+            donothing_callback()       
                    
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):
