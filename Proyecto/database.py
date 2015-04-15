@@ -56,7 +56,7 @@ class database:
         if len(self.data_collection) > 0:            
             return ('tenemos','algunas','colecciones')
         else:
-            return ('puto','pringau')
+            return ('todo','vacio')
         
     def reescale_bd(self,d):
         for elem in self.data_unchecked:

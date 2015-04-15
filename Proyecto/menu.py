@@ -5,7 +5,6 @@ Created on 24/3/2015
 '''
 from Tkinter import *
 import ttk
-from panels import SeePanel
 from Tkconstants import BOTH, TOP, LEFT, BOTTOM, RIGHT
 import cv2
 import numpy as np
@@ -22,6 +21,7 @@ import os
 from matplotlib.cbook import Null
 from doctest import master
 from _warnings import default_action
+from aux_dialogs import *
  
 class MenuDemo(ttk.Frame):
     
@@ -234,7 +234,10 @@ class MenuDemo(ttk.Frame):
         for c in ('red', 'orange', 'yellow', 'green', 'blue'):
             menu.add_command(label=c, background=c,command=lambda c=c: self._you_invoked((c, 'color')))   
             
-    
+    def reset_btn_act_but(self):
+        im = Image.open('no-image.png')
+        imh = ImageTk.PhotoImage(im)
+        self.btn_act_but.config(image=imh)
     
     #Carga una imagen deseada, crea una mariposa, la muestra, pregunta si esta rota y la guarda en la bd
     def load_but(self):
@@ -247,19 +250,22 @@ class MenuDemo(ttk.Frame):
         
         s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
         self.but_act.set_broken(s)
+        self.update_but_frame(self.but_act.get_min_img())
         if self.db.new_but(self.but_act) == -1:
-            self.refresh_grid()
             tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
         else:
-            tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")
-        self.update_but_frame(self.but_act)
+            tkMessageBox.showinfo(None, "mariposa ha sido aniadida a la base de datos, pero sin procesar.")
+        
         
     def edit_but(self):
-        self.dialog_edit_but()
+        if not(self.but_act == Null):
+            dialog_edit_but()
+        else:
+            tkMessageBox.showinfo(None, "Ninguna mariposa para procesar")
         
     def new_col(self):
         '''TODO'''
-        self.dialog_new_col()
+        dialog_new_col()
         self._add_collection_menu()
     
     def close_but(self):
@@ -304,7 +310,7 @@ class MenuDemo(ttk.Frame):
                 error = error + 1
         d = d/(c-error)
         self.db.reescale_bd(d)
-        self.refresh_grid()
+        #self.refresh_grid()
         self.w.mainloop()
         
     def refresh_panel(self,img):        
@@ -330,9 +336,8 @@ class MenuDemo(ttk.Frame):
             r = r + 1
         #self.w.mainloop()
     
-    def update_but_frame(self,but):
-        im = but.get_min_img()
-        self.btn_act_but.config(image=im)
+    def update_but_frame(self,img):
+        self.btn_act_but.config(image=img)
     
     
     def load_db(self):
@@ -378,76 +383,7 @@ class MenuDemo(ttk.Frame):
         # triggered when an entry in the Icons, More or Colors menu is selected
         self.bell()
         self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
-                
-    class dialog_new_col:
-        root = None
-        e1 = None
-        img = Null
-        
-        def __init__(self):
-            self.root = Tk()
-            frame = Frame(self.root,name='dialog_new_col')
-            frame.pack()
-            
-            label = Label(frame, text="Nombre de la nueva coleccion:") 
-            self.e1 = Entry(frame, bd =5)
-            self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
-            self.crear = Button(frame, text="Crear", command=self.crear)
-            
-            label.pack(side=LEFT)
-            self.e1.pack(side = RIGHT)
-            self.subir_foto.pack(side=LEFT) 
-            self.crear.pack(side=RIGHT)
-            
-            label.grid(row=0, column=0)
-            self.e1.grid(row=0, column=1)
-            self.subir_foto.grid(row=1, column=0)
-            self.crear.grid(row=1, column=1)
-                
-            self.root.mainloop()
-            
-        def crear(self):
-            n = self.e1.get()
-            col = collection(self.img,n)
-            MenuDemo.db.new_col(col)
-            self.root.quit()
-            
-        def foto_col(self):
-            f = str(askopenfile())
-            path = get_path(f)
-            self.img = np.array(Image.open(path)) 
-            
-    class dialog_edit_but:
-        def __init__(self):
-            self.root = Tk()
-            frame = Frame(self.root,name='dialog_edit')
-            frame.pack()
-            
-            label = Label(frame, text="Opciones:") 
-            self.e1 = Entry(frame, bd =5)
-            self.subir_foto = Button(frame, text="Eliminar mariposa", command=self.delete_but) 
-            '''TODO'''
-            self.crear = Button(frame, text="Insertar en base de datos", command=self.comparar)
-            
-            label.pack(side=LEFT)
-            self.e1.pack(side = RIGHT)
-            self.subir_foto.pack(side=LEFT) 
-            self.crear.pack(side=RIGHT)
-            
-            label.grid(row=0, column=0)
-            self.e1.grid(row=0, column=1)
-            self.subir_foto.grid(row=1, column=0)
-            self.crear.grid(row=1, column=1)
-                
-            self.root.mainloop()   
-        def delete_but(self):
-            '''TODO'''
-            donothing_callback()  
-            
-        def comparar(self):
-            '''TODO'''
-            donothing_callback()       
-                   
+                      
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):
     aux = 0
@@ -463,7 +399,7 @@ def get_path(s):
             p = p[:aux]
             break
         aux += 1
-    return p
+    return p            
          
 if __name__ == '__main__':
     MenuDemo().mainloop()
