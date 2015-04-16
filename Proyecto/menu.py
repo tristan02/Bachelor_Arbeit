@@ -21,7 +21,7 @@ import os
 from matplotlib.cbook import Null
 from doctest import master
 from _warnings import default_action
-from aux_dialogs import *
+
  
 class MenuDemo(ttk.Frame):
     
@@ -33,8 +33,10 @@ class MenuDemo(ttk.Frame):
     img = Null
     btn_act_but = Null
     db = database()
+    _instance_new_col = None
+    _instance_but_act = None
      
-    def __init__(self, name='menu'):
+    def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
         self.pack(fill=BOTH)
         self.master.title('Buterflies Database')
@@ -57,7 +59,7 @@ class MenuDemo(ttk.Frame):
         btn_new_col.image = imh
         btn_new_col['compound'] = LEFT
         btn_new_col.focus()
-        btn_new_col.grid(in_=self, row=0, column=0, sticky=E)
+        btn_new_col.grid(in_=self, row=0, column=0, sticky=W)
         btn_new_col.pack(side=LEFT)
         
         #Button nueva mariposa
@@ -147,16 +149,16 @@ class MenuDemo(ttk.Frame):
  
     # Cascades menu ------------------------------------------------------------------           
     def _add_collection_menu(self):
-        cascades = Menu(self._menu)
-        self._menu.add_cascade(label='Cascades', menu=cascades, underline=0)
+        collection = Menu(self._menu)
+        self._menu.add_cascade(label='Collection', menu=collection, underline=0)
          
-        cascades.add_command(label='Print Hello', underline=6,accelerator='Control+H',command=lambda: self._print_it(None, 'Hello'))
+        collection.add_command(label='Print Hello', underline=6,accelerator='Control+H',command=lambda: self._print_it(None, 'Hello'))
  
-        cascades.add_command(label='Print Goodbye', underline=6,accelerator='Control+G',command=lambda: self._print_it(None, 'Goodbye'))
+        collection.add_command(label='Print Goodbye', underline=6,accelerator='Control+G',command=lambda: self._print_it(None, 'Goodbye'))
  
         # add submenus       
-        self._add_casc_but(cascades)    # check buttons
-        self._add_casc_rbs(cascades)    # radio buttons
+        self._add_casc_but(collection)    # check buttons
+        self._add_casc_rbs(collection)    # radio buttons
  
         # bind accelerator key to a method; the bind is on ALL the
         # applications widgets
@@ -259,14 +261,16 @@ class MenuDemo(ttk.Frame):
         
     def edit_but(self):
         if not(self.but_act == Null):
-            dialog_edit_but()
+            if self._instance_but_act == None:
+                self.dialog_edit_but()
         else:
             tkMessageBox.showinfo(None, "Ninguna mariposa para procesar")
         
     def new_col(self):
-        '''TODO'''
-        dialog_new_col()
-        self._add_collection_menu()
+        if self._instance_new_col == None:
+            self.dialog_new_col()
+            '''TOTO
+            self._add_collection_menu()'''
     
     def close_but(self):
         if self.panel != Null:
@@ -326,16 +330,6 @@ class MenuDemo(ttk.Frame):
         except IOError:
             self.panel.destroy()
             
-    def refresh_grid(self):
-        r = 0
-        for i in range(self.db.get_count_but()):
-            b = self.db.get_but(i)
-            if self.panel != Null:
-                self.panel.destroy()
-            panel = Label(self.frame, image=b.get_min_img() ,borderwidth=1 ).grid(row=r,column=0)
-            r = r + 1
-        #self.w.mainloop()
-    
     def update_but_frame(self,img):
         self.btn_act_but.config(image=img)
     
@@ -344,9 +338,8 @@ class MenuDemo(ttk.Frame):
         b = str(askopenfile())
         path = self.get_path(b)
         self.db.load_db(path)
-        self.refresh_grid()     
+        self.refresh_grid()        
         
-                     
     # ================================================================================
     # Bound and Command methods
     # ================================================================================               
@@ -383,6 +376,86 @@ class MenuDemo(ttk.Frame):
         # triggered when an entry in the Icons, More or Colors menu is selected
         self.bell()
         self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
+        
+    #Clase para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
+    class dialog_new_col():
+        root = None
+        e1 = None
+        img = Null
+        
+        def __init__(self):
+            self.root = Tk()
+            frame = Frame(self.root,name='dialog_new_col', width=200, height=200)
+            self.root.title('Nueva coleccion...')
+            frame.pack()
+        
+            label = Label(frame, text="Nombre de la nueva coleccion:") 
+            self.e1 = Entry(frame, bd =5)
+            self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
+            self.crear = Button(frame, text="Crear", command=self.crear)
+            
+            label.pack(side=LEFT)
+            self.e1.pack(side = RIGHT)
+            self.subir_foto.pack(side=LEFT) 
+            self.crear.pack(side=RIGHT)
+            
+            label.grid(row=0, column=0)
+            self.e1.grid(row=0, column=1)
+            self.subir_foto.grid(row=1, column=0)
+            self.crear.grid(row=1, column=1)
+            
+            MenuDemo._instance_new_col = self
+                
+            self.root.mainloop()   
+            
+        def crear(self):        
+            n = self.e1.get()
+            col = collection(self.img,n)
+            MenuDemo.db.new_col(col)
+            MenuDemo._instance_new_col = None
+            self.root.destroy() 
+            
+        def foto_col(self):
+            f = str(askopenfile())
+            path = get_path(f)
+            self.img = np.array(Image.open(path))
+            
+            
+    class dialog_edit_but:
+        def __init__(self):
+            self.root = Tk()
+            frame = Frame(self.root,name='dialog_edit')
+            self.root.title('Editar...')
+            frame.pack()
+            
+            label = Label(frame, text="Opciones:")
+            self.del_but = Button(frame, text="Eliminar mariposa", command=self.delete_but) 
+            self.ins_but = Button(frame, text="Insertar en base de datos", command=self.comparar)
+            
+            label.pack(side=LEFT)
+            self.del_but.pack(side=LEFT) 
+            self.ins_but.pack(side=LEFT)
+            
+            label.grid(row=0, column=0)
+            self.del_but.grid(row=1, column=0)
+            self.ins_but.grid(row=2, column=0)
+            
+            MenuDemo._instance_but_act = self
+                
+            self.root.mainloop()   
+            
+        def delete_but(self):
+            MenuDemo.but_act = Null
+            im = Image.open('new.png')
+            imh = ImageTk.PhotoImage(im)
+            MenuDemo.btn_act_but.config(image=imh)
+            MenuDemo._instance_but_act = None
+            self.root.destroy()
+                                
+        def comparar(self):
+            '''TODO'''
+            MenuDemo._instance_but_act = None
+            self.root.destroy()
                       
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):
