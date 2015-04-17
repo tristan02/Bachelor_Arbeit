@@ -10,6 +10,7 @@ import tkMessageBox
 import ImageTk, Image
 from matplotlib.cbook import Null
 from matplotlib.mlab import donothing_callback
+from collection import collection
 
 
 class database:
@@ -20,8 +21,11 @@ class database:
     num_col = 0
     
     def __init__(self):
-        pass
-    
+        col1 = collection(None,'Europa')
+        col2 = collection(None,'Africa')
+        self.data_collection.append(col1)
+        self.data_collection.append(col2)
+        
     #Agregamos una nueva mariposa sin procesar a la base de datos
     def new_but(self,but):
         new = True
@@ -49,15 +53,12 @@ class database:
         else:
             return -1
         
-    def get_col(self):
-        set = ()
-        '''for elem in self.data_collection:
-            set.add(elem.get_name())'''
-        if len(self.data_collection) > 0:            
-            return ('tenemos','algunas','colecciones')
-        else:
-            return ('todo','vacio')
-        
+    def get_cols(self):
+        cols = []
+        for elem in self.data_collection:
+            cols.append(elem.get_name())
+        return cols
+            
     def reescale_bd(self,d):
         for elem in self.data_unchecked:
             if not((elem.get_dist03() + 3) > d and (elem.get_dist03() - 3) < d):

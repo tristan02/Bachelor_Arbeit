@@ -32,16 +32,22 @@ class MenuDemo(ttk.Frame):
     grid = Null
     img = Null
     btn_act_but = Null
-    db = database()
+    db = None
     _instance_new_col = None
     _instance_but_act = None
+    _sel_col = ''
+    new_col = None
+    e1 = None
+    img = Null
+    Colecciones = None
+    btn_cols = {}
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
         self.pack(fill=BOTH)
         self.master.title('Buterflies Database')
-        self._create_panel()
         self.db = database() 
+        self._create_panel()        
     
     def _create_panel(self):
         Panel = Frame(self, name='panel')
@@ -49,43 +55,55 @@ class MenuDemo(ttk.Frame):
          
         msg = ["Butterflies Database"]
          
-        lbl = ttk.Label(Panel, text=''.join(msg), wraplength='4i', justify=LEFT)
+        lbl = Label(Panel, text=''.join(msg), wraplength='4i', justify=LEFT)
         lbl.pack(side=TOP, padx=5, pady=5)
         
+        #Frame para opciones
+        Tareas = Frame(name='tareas',padx=20,pady=20)
+        Tareas.pack()
         #Button collection
         im = Image.open('upload.jpg')
         imh = ImageTk.PhotoImage(im)
-        btn_new_col = Button(text='New Collection...', image=imh, default=ACTIVE, command=self.new_col)
+        btn_new_col = Button(Tareas,text='New Collection...', image=imh, default=ACTIVE, command=self.new_col)
         btn_new_col.image = imh
         btn_new_col['compound'] = LEFT
         btn_new_col.focus()
-        btn_new_col.grid(in_=self, row=0, column=0, sticky=W)
-        btn_new_col.pack(side=LEFT)
-        
+        btn_new_col.pack(side=LEFT)        
         #Button nueva mariposa
         im = Image.open('new.png')
         imh = ImageTk.PhotoImage(im)
-        btn_new_but = Button(name='btn_new_but', text='New Butterfly...', image=imh, default=ACTIVE, command=self.load_but)
+        btn_new_but = Button(Tareas,name='btn_new_but', text='New Butterfly...', image=imh, default=ACTIVE, command=self.load_but)
         btn_new_but.image = imh
         btn_new_but['compound'] = LEFT
         btn_new_but.focus()
-        btn_new_but.grid(in_=self, row=0, column=1, sticky=E)
         btn_new_but.pack(side=RIGHT)
         
         #Frame para mariposa actual
+        Central = Frame(name='panel central')
+        Central.pack()
         im = Image.open('no-image.png')
         imh = ImageTk.PhotoImage(im)
-        self.btn_act_but = Button(name='btn_act_but',text='Mariposa pendiente de estudio', image=imh, default=ACTIVE, command=self.edit_but)
+        self.btn_act_but = Button(Central,name='btn_act_but',text='Mariposa pendiente de estudio', image=imh, default=ACTIVE, command=self.edit_but)
         self.btn_act_but.image = imh
         self.btn_act_but['compound'] = LEFT
         self.btn_act_but.focus()
-        self.btn_act_but.grid(in_=self, row=1, column=1)
-        self.btn_act_but.pack(side=RIGHT)        
+        self.btn_act_but.pack(side=BOTTOM)
+        
+        #Frame para seleccion de coleciones existenetes
+        self.Colecciones = Frame(name='colecciones')
+        self.Colecciones.pack()
+        tit = 'Colecciones disponibles:'
+        tit_cols = Label(self.Colecciones, text=''.join(tit), wraplength='4i')
+        tit_cols.pack(side=TOP, padx=5, pady=5)  
+        for i in self.db.get_cols():
+            action = lambda x = i: self.set_col(x)
+            self.btn_cols[i] = Button(self.Colecciones, text=i, width=20,command=action) 
+            self.btn_cols[i].pack()
+        self._sel_col = None
          
         # create statusbar
-        statusBar = ttk.Frame()
-        self.__status = ttk.Label(self.master, text=' ', borderwidth=1,
-                              font=('Helv 10'), name='status')
+        statusBar = Frame()
+        self.__status = Label(self.master, text=' ', borderwidth=1,font=('Helv 10'), name='status')
          
         self.__status.pack(side=LEFT, padx=2, fill=BOTH)
         statusBar.pack(side=BOTTOM, fill=X, pady=2)
@@ -202,7 +220,7 @@ class MenuDemo(ttk.Frame):
              
         submenu.add_separator()
         '''TODO'''
-        conj = self.db.get_col()
+        conj = self.db.get_cols()
         for i in conj:
             print i
         for item in conj:
@@ -240,6 +258,20 @@ class MenuDemo(ttk.Frame):
         im = Image.open('no-image.png')
         imh = ImageTk.PhotoImage(im)
         self.btn_act_but.config(image=imh)
+        
+    def set_col(self,col):
+        '''TODO'''
+        #self.btn_cols[1].configure(bg = "blue")        
+        self._sel_col = col
+        print str(col)
+        
+    def update_cols(self,n):        
+        btn_new_col = Button(self.Colecciones,name=n.lower(),text=n,default=ACTIVE, width=20, command=lambda:self.set_col(n))
+        btn_new_col.pack()
+        self.Colecciones.pack()
+        self.set_col(n)
+        '''TODO
+        self._add_collection_menu()'''
     
     #Carga una imagen deseada, crea una mariposa, la muestra, pregunta si esta rota y la guarda en la bd
     def load_but(self):
@@ -260,17 +292,19 @@ class MenuDemo(ttk.Frame):
         
         
     def edit_but(self):
-        if not(self.but_act == Null):
-            if self._instance_but_act == None:
-                self.dialog_edit_but()
+        if self._sel_col != None:
+            if not(self.but_act == Null):
+                if self._instance_but_act == None:
+                    self.dialog_edit_but()
+            else:
+                tkMessageBox.showinfo(None, "Ninguna mariposa para procesar")
         else:
-            tkMessageBox.showinfo(None, "Ninguna mariposa para procesar")
+            tkMessageBox.showinfo(None, "Seleccione primero una coleccion, o cree una nueva!")
         
     def new_col(self):
         if self._instance_new_col == None:
             self.dialog_new_col()
-            '''TOTO
-            self._add_collection_menu()'''
+            '''self.update_cols()'''
     
     def close_but(self):
         if self.panel != Null:
@@ -331,8 +365,7 @@ class MenuDemo(ttk.Frame):
             self.panel.destroy()
             
     def update_but_frame(self,img):
-        self.btn_act_but.config(image=img)
-    
+        self.btn_act_but.config(image=img)    
     
     def load_db(self):
         b = str(askopenfile())
@@ -377,85 +410,82 @@ class MenuDemo(ttk.Frame):
         self.bell()
         self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
         
-    #Clase para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
-    class dialog_new_col():
-        root = None
-        e1 = None
-        img = Null
+    #Funcion para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
+    def dialog_new_col(self):
+        self.new_col = Tk()
+        frame = Frame(self.new_col,name='dialog_new_col', width=200, height=200)
+        self.new_col.title('Nueva coleccion...')
+        frame.pack()
+    
+        label = Label(frame, text="Nombre de la nueva coleccion:") 
+        self.e1 = Entry(frame, bd =5)
+        self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
+        self.crear = Button(frame, text="Crear", command=self.crear)
         
-        def __init__(self):
-            self.root = Tk()
-            frame = Frame(self.root,name='dialog_new_col', width=200, height=200)
-            self.root.title('Nueva coleccion...')
-            frame.pack()
+        label.pack(side=LEFT)
+        self.e1.pack(side = RIGHT)
+        self.subir_foto.pack(side=LEFT) 
+        self.crear.pack(side=RIGHT)
         
-            label = Label(frame, text="Nombre de la nueva coleccion:") 
-            self.e1 = Entry(frame, bd =5)
-            self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
-            self.crear = Button(frame, text="Crear", command=self.crear)
+        label.grid(row=0, column=0)
+        self.e1.grid(row=0, column=1)
+        self.subir_foto.grid(row=1, column=0)
+        self.crear.grid(row=1, column=1)
+        
+        self._instance_new_col = self
             
-            label.pack(side=LEFT)
-            self.e1.pack(side = RIGHT)
-            self.subir_foto.pack(side=LEFT) 
-            self.crear.pack(side=RIGHT)
+        self.new_col.mainloop() 
+        
+    def crear(self):        
+        n = self.e1.get()
+        col = collection(self.img,n)
+        self.db.new_col(col)
+        self._instance_new_col = None
+        self.update_cols(n)
+        self.new_col.destroy() 
+        self.new_col = None
+        
+    def foto_col(self):
+        f = str(askopenfile())
+        path = get_path(f)
+        self.img = np.array(Image.open(path))
+        
+        
+
+    def dialog_edit_but(self):
+        self.root = Tk()
+        frame = Frame(self.root,name='dialog_edit')
+        self.root.title('Editar...')
+        frame.pack()
+        
+        label = Label(frame, text="Opciones:")
+        self.del_but = Button(frame, text="Eliminar mariposa", command=self.delete_but) 
+        self.ins_but = Button(frame, text="Insertar en base de datos", command=self.comparar)
+        
+        label.pack(side=LEFT)
+        self.del_but.pack(side=LEFT) 
+        self.ins_but.pack(side=LEFT)
+        
+        label.grid(row=0, column=0)
+        self.del_but.grid(row=1, column=0)
+        self.ins_but.grid(row=2, column=0)
+        
+        MenuDemo._instance_but_act = self
             
-            label.grid(row=0, column=0)
-            self.e1.grid(row=0, column=1)
-            self.subir_foto.grid(row=1, column=0)
-            self.crear.grid(row=1, column=1)
-            
-            MenuDemo._instance_new_col = self
-                
-            self.root.mainloop()   
-            
-        def crear(self):        
-            n = self.e1.get()
-            col = collection(self.img,n)
-            MenuDemo.db.new_col(col)
-            MenuDemo._instance_new_col = None
-            self.root.destroy() 
-            
-        def foto_col(self):
-            f = str(askopenfile())
-            path = get_path(f)
-            self.img = np.array(Image.open(path))
-            
-            
-    class dialog_edit_but:
-        def __init__(self):
-            self.root = Tk()
-            frame = Frame(self.root,name='dialog_edit')
-            self.root.title('Editar...')
-            frame.pack()
-            
-            label = Label(frame, text="Opciones:")
-            self.del_but = Button(frame, text="Eliminar mariposa", command=self.delete_but) 
-            self.ins_but = Button(frame, text="Insertar en base de datos", command=self.comparar)
-            
-            label.pack(side=LEFT)
-            self.del_but.pack(side=LEFT) 
-            self.ins_but.pack(side=LEFT)
-            
-            label.grid(row=0, column=0)
-            self.del_but.grid(row=1, column=0)
-            self.ins_but.grid(row=2, column=0)
-            
-            MenuDemo._instance_but_act = self
-                
-            self.root.mainloop()   
-            
-        def delete_but(self):
-            MenuDemo.but_act = Null
-            im = Image.open('new.png')
-            imh = ImageTk.PhotoImage(im)
-            MenuDemo.btn_act_but.config(image=imh)
-            MenuDemo._instance_but_act = None
-            self.root.destroy()
-                                
-        def comparar(self):
-            '''TODO'''
-            MenuDemo._instance_but_act = None
-            self.root.destroy()
+        self.root.mainloop()   
+        
+    def delete_but(self):
+        MenuDemo.but_act = Null
+        im = Image.open('new.png')
+        imh = ImageTk.PhotoImage(im)
+        self.btn_act_but.config(image=imh)
+        self._instance_but_act = None
+        self.root.destroy()
+                            
+    def comparar(self):
+        '''TODO'''
+        MenuDemo._instance_but_act = None
+        self.root.destroy()
                       
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):
