@@ -21,6 +21,7 @@ import os
 from matplotlib.cbook import Null
 from doctest import master
 from _warnings import default_action
+import ScrolledText
 
  
 class MenuDemo(ttk.Frame):
@@ -427,31 +428,38 @@ class MenuDemo(ttk.Frame):
         self.new_col.title('Nueva coleccion...')
         frame.pack()
     
-        label = Label(frame, text="Nombre de la nueva coleccion:") 
+        label1 = Label(frame, text="Nombre de la nueva coleccion:",padx=20,pady=20) 
         self.e1 = Entry(frame, bd =5)
+        label2 = Label(frame, text="Informacion adicional:",padx=10,pady=10) 
+        self.e2 = ScrolledText.ScrolledText(frame,width=40, height=5, wrap=WORD,padx=10,pady=10)
         self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
         self.crear = Button(frame, text="Crear", command=self.crear)
         
-        label.pack(side=LEFT)
+        label1.pack(side=LEFT)
+        label2.pack(side=LEFT)
         self.e1.pack(side = RIGHT)
+        self.e2.pack(side = RIGHT)
         self.subir_foto.pack(side=LEFT) 
         self.crear.pack(side=RIGHT)
         
-        label.grid(row=0, column=0)
+        label1.grid(row=0, column=0)
         self.e1.grid(row=0, column=1)
-        self.subir_foto.grid(row=1, column=0)
-        self.crear.grid(row=1, column=1)
+        label2.grid(row=1, column=0)
+        self.e2.grid(row=1, column=1)
+        self.subir_foto.grid(row=2, column=0)
+        self.crear.grid(row=2, column=1)
         
         self._instance_new_col = self
             
         self.new_col.mainloop() 
         
     def crear(self):        
-        n = self.e1.get()
-        col = collection(self.img,n)
+        nom = self.e1.get()
+        inf = self.e2.get()
+        col = collection(self.img,nom,inf)
         self.db.new_col(col)
         self._instance_new_col = None
-        self.update_cols(n)
+        self.update_cols(nom)
         self.new_col.destroy() 
         self.new_col = None
         
