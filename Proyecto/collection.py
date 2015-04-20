@@ -10,11 +10,13 @@ from matplotlib.cbook import Null
 
 class collection:
     name = ''
+    info = ''
     img = None
     id = -1
     
-    def __init__(self,img,name):
+    def __init__(self,img,name,info):
         self.name = name
+        self.info = info
         if(img!=None):
             self.img = img
         else:
@@ -22,6 +24,9 @@ class collection:
     
     def get_name(self):
         return self.name
+    
+    def get_info(self):
+        return self.info
     
     def get_img(self):
         return self.img

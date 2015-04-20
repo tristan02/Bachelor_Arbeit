@@ -11,20 +11,29 @@ import ImageTk, Image
 from matplotlib.cbook import Null
 from matplotlib.mlab import donothing_callback
 from collection import collection
+import os
 
 
 class database:
     
     data_collection = []
     data_unchecked = []
+    data_checked = []
     num_but = 0
     num_col = 0
     
     def __init__(self):
-        col1 = collection(None,'Europa')
-        col2 = collection(None,'Africa')
+        col1 = collection(None,'Europa','Esta collection es muy completa. Es la hostia.')
+        col2 = collection(None,'Africa','Esta collection es muy completa. Es la hostia.')
         self.data_collection.append(col1)
         self.data_collection.append(col2)
+        
+        i = np.array(Image.open('img (2).jpg'))  
+        but1 = butterfly(i,'but1')
+        i = np.array(Image.open('img (3).jpg'))
+        but2 = butterfly(i,'but2')
+        
+        self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}
         
     #Agregamos una nueva mariposa sin procesar a la base de datos
     def new_but(self,but):
@@ -59,9 +68,14 @@ class database:
             cols.append(elem.get_name())
         return cols
     
+    def get_buts_col(self,col):
+        return self.data_checked[col]
+    
     def get_info_col(self,col_act):
-        '''TODO'''
-        donothing_callback()
+        for elem in self.data_collection:
+            if col_act == elem.get_name():
+                return (elem.get_info(),elem.get_img())
+        return ('0','0')
             
     def reescale_bd(self,d):
         for elem in self.data_unchecked:
