@@ -58,6 +58,10 @@ class database:
         for elem in self.data_collection:
             cols.append(elem.get_name())
         return cols
+    
+    def get_info_col(self,col_act):
+        '''TODO'''
+        donothing_callback()
             
     def reescale_bd(self,d):
         for elem in self.data_unchecked:

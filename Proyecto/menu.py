@@ -32,15 +32,16 @@ class MenuDemo(ttk.Frame):
     grid = Null
     img = Null
     btn_act_but = Null
+    btn_act_col = Null
     db = None
     _instance_new_col = None
     _instance_but_act = None
-    _sel_col = ''
     new_col = None
     e1 = None
     img = Null
     Colecciones = None
     btn_cols = {}
+    col_act = '-'
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
@@ -99,8 +100,16 @@ class MenuDemo(ttk.Frame):
             action = lambda x = i: self.set_col(x)
             self.btn_cols[i] = Button(self.Colecciones, text=i, width=20,command=action) 
             self.btn_cols[i].pack()
-        self._sel_col = None
-         
+        self.col_act = '-'
+        
+        #Frame para la coleccion actual
+        self.Coleccion = Frame(name='coleccion_actual')
+        self.Coleccion.pack()
+        self.btn_act_col = Button(self.Coleccion,name='btn_act_col', text='Coleccion actual: '+self.col_act, default=ACTIVE, command=self.show_info_col)
+        self.btn_act_col.focus()
+        self.btn_act_col.pack(side=BOTTOM,padx=25, pady=25)
+        
+                 
         # create statusbar
         statusBar = Frame()
         self.__status = Label(self.master, text=' ', borderwidth=1,font=('Helv 10'), name='status')
@@ -259,11 +268,9 @@ class MenuDemo(ttk.Frame):
         imh = ImageTk.PhotoImage(im)
         self.btn_act_but.config(image=imh)
         
-    def set_col(self,col):
-        '''TODO'''
-        #self.btn_cols[1].configure(bg = "blue")        
-        self._sel_col = col
-        print str(col)
+    def set_col(self,col): 
+        self.col_act = col
+        self.btn_act_col.config(text='Coleccion actual: '+self.col_act,bg = "firebrick3")
         
     def update_cols(self,n):        
         btn_new_col = Button(self.Colecciones,name=n.lower(),text=n,default=ACTIVE, width=20, command=lambda:self.set_col(n))
@@ -292,7 +299,7 @@ class MenuDemo(ttk.Frame):
         
         
     def edit_but(self):
-        if self._sel_col != None:
+        if self.col_act != '-':
             if not(self.but_act == Null):
                 if self._instance_but_act == None:
                     self.dialog_edit_but()
@@ -305,6 +312,9 @@ class MenuDemo(ttk.Frame):
         if self._instance_new_col == None:
             self.dialog_new_col()
             '''self.update_cols()'''
+            
+    def show_info_col(self):
+        self.db.get_info_col(self.col_act)
     
     def close_but(self):
         if self.panel != Null:
