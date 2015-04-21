@@ -341,6 +341,7 @@ class MenuDemo(ttk.Frame):
             '''self.update_cols()'''
             
     def show_info_col(self):
+        '''TODO'''
         (info,img) = self.db.get_info_col(self.col_act)
         tkMessageBox._show(self.col_act, info)
         
@@ -504,15 +505,8 @@ class MenuDemo(ttk.Frame):
         label2 = Label(frame, text="Informacion adicional:",padx=10,pady=10) 
         self.e2 = ScrolledText.ScrolledText(frame,width=40, height=5, wrap=WORD,padx=10,pady=10)
         self.subir_foto = Button(frame, text="Subir foto...", command=self.foto_col) 
-        self.crear = Button(frame, text="Crear", command=self.crear)
-        
-        label1.pack(side=LEFT)
-        label2.pack(side=LEFT)
-        self.e1.pack(side = RIGHT)
-        self.e2.pack(side = RIGHT)
-        self.subir_foto.pack(side=LEFT) 
-        self.crear.pack(side=RIGHT)
-        
+        self.crear = Button(frame, text="Crear", command=self.crear_col)
+           
         label1.grid(row=0, column=0)
         self.e1.grid(row=0, column=1)
         label2.grid(row=1, column=0)
@@ -524,7 +518,7 @@ class MenuDemo(ttk.Frame):
             
         self.new_col.mainloop() 
         
-    def crear(self):        
+    def crear_col(self):        
         nom = self.e1.get()
         inf = self.e2.get(1.0, END)
         col = collection(self.img,nom,inf)
@@ -537,9 +531,7 @@ class MenuDemo(ttk.Frame):
     def foto_col(self):
         f = str(askopenfile())
         path = get_path(f)
-        self.img = np.array(Image.open(path))
-        
-        
+        self.img = np.array(Image.open(path))       
 
     def dialog_edit_but(self):
         self.root = Tk()
@@ -577,7 +569,7 @@ class MenuDemo(ttk.Frame):
         s = tkMessageBox.askquestion(None, "Esta seguro que quiere eliminar permanentemente este ejemplar?")
         if s == 'yes':
             if not(self.estudio):
-                self.db.del_item(self.but_act)                
+                self.db.del_item(self.col_act,self.but_act)                
             self.but_act = Null
             self.update_frame_but(self.no_img)
             self._instance_but_act = None

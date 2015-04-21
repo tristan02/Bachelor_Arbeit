@@ -49,6 +49,11 @@ class database:
         else:
             return -1
         
+    def del_item(self,col,but):
+        valor = self.data_checked[col]
+        valor.remove(but)
+        self.data_checked[col] = valor
+        
     def new_col(self,col):
         new = True
         for elem in self.data_collection:
@@ -58,6 +63,7 @@ class database:
                 new = False
         if new:        
             self.data_collection.append(col)
+            self.data_checked[col.get_name()] = []
             return 0
         else:
             return -1
@@ -69,7 +75,8 @@ class database:
         return cols
     
     def get_buts_col(self,col):
-        return self.data_checked[col]
+        i = self.data_checked[col]
+        return i
     
     def get_info_col(self,col_act):
         for elem in self.data_collection:
