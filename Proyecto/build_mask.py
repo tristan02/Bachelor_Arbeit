@@ -49,7 +49,7 @@ def get_contour(contours,w,h):
     
     return cnt,centroide,area
 
-def get_mask(img):
+def build_mask(img):
     t1 = 230
     t2 = 255
     t3 = 0

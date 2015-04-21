@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import ImageTk, Image
 from matplotlib.cbook import Null
-from Proyecto.get_mask import get_mask
+from Proyecto.build_mask import build_mask
 from Proyecto.get_histogram import get_hist
 
 
@@ -39,6 +39,7 @@ class butterfly:
         #Creamos la imagen en miniatura
         aux = cv2.resize(img,(self.w/4, self.h/4), interpolation = cv2.INTER_CUBIC)
         self.min_img = ImageTk.PhotoImage(Image.fromarray(aux))
+        self.set_mask()
     
     #A partir de la medida entre el 0 y el 3 que son "3cmm" reescalamos a escala 2:1
     def reescale(self,d):
@@ -63,19 +64,20 @@ class butterfly:
     def get_dist03(self):
         return self.dist03
     
-    def get_mask(self):
+    def set_mask(self):
         if self.area == 0 and not(self.reescaled):
-            self.mask_img,self.centroide,self.area = get_mask(self.np_img)
+            self.mask_img,self.centroide,self.area = build_mask(self.np_img)
         elif self.area == 0 and self.reescaled:
-            self.mask_img,self.centroide,self.area = get_mask(self.orig_img)
+            self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
             self.reescale_mask()
         
+    def get_mask(self):
         #cv2.imwrite(self.name + '_mask.jpg', self.mask_img)
         return self.mask_img
     
     def get_hist(self):
         if self.area == 0 and not(self.reescaled):
-            self.get_mask()
+            self.set_mask()
             self.hist_img = get_hist(self.np_img,self.mask_img)
         else:
             self.hist_img = get_hist(self.np_img,self.mask_img)

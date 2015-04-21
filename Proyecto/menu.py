@@ -128,6 +128,12 @@ class MenuDemo(ttk.Frame):
         self.btn_act_col.focus()
         self.btn_act_col.pack(side=BOTTOM,padx=25, pady=25)
         
+        #Barra de progeso
+        ft = ttk.Frame()            
+        ft.pack(expand=True, fill=BOTH, side=TOP)             
+        self.progress_bar = ttk.Progressbar(ft, orient='horizontal', mode='determinate')             
+        self.progress_bar.pack(expand=True, fill=BOTH, side=TOP) 
+        
                  
         # create statusbar
         statusBar = Frame()
@@ -287,12 +293,15 @@ class MenuDemo(ttk.Frame):
         imh = ImageTk.PhotoImage(im)
         self.btn_act_but.config(image=imh)
         
+    #Establece como coleccion actual la que viene pasada por parametro. El boton rojo se actualiza. En caso de que estemos
+    #estudiando un especimen nuevo, nos preguntara si queremos descartar dicho item.
     def set_col(self,col): 
         self.col_act = col
         self.btn_act_col.config(text='Coleccion actual: '+self.col_act,bg = "firebrick3")
         if not(self.estudio):
             self.show_buts(self.db.get_buts_col(col))
-        
+    
+    #Una vez creada una nueva coleccion, creamos un nuevo boton con el nombre de la nueva coleccion.    
     def update_cols(self,n):        
         btn_new_col = Button(self.Colecciones,name=n.lower(),text=n,default=ACTIVE, width=20, command=lambda:self.set_col(n))
         btn_new_col.pack()
@@ -417,13 +426,11 @@ class MenuDemo(ttk.Frame):
                 d = d + dist
                 but.set_dist03(dist)
             else:
-                #TODO Si no se ha detectado bien el 03 hay que hacer algo!
+                ''''TODO Si no se ha detectado bien el 03 hay que hacer algo!'''
                 #self.db.delete_but(but)
                 error = error + 1
         d = d/(c-error)
         self.db.reescale_bd(d)
-        #self.refresh_grid()
-        self.w.mainloop()
         
     def refresh_panel(self,img):        
         if self.panel != Null:
@@ -441,10 +448,11 @@ class MenuDemo(ttk.Frame):
     def update_frame_new_but(self,img):
         self.btn_act_but.config(image=img,text='Mariposa pendiente de estudio')          
         self.btn_act_but['compound'] = BOTTOM  
-        
-    def update_frame_but(self,but):
-        if but != []:
-            self.btn_act_but.config(image=but)   
+    
+    #Actualizamos el frame central con una nueva imagen y quitamos la etqiqueta 'en estudio' en caso de que ya no sea precisa    
+    def update_frame_but(self,img):
+        if img != []:
+            self.btn_act_but.config(image=img)   
         else:
             self.btn_act_but.config(image=self.no_img)
         if not(self.estudio):
@@ -535,25 +543,25 @@ class MenuDemo(ttk.Frame):
 
     def dialog_edit_but(self):
         self.root = Tk()
-        frame = Frame(self.root,name='dialog_edit',padx=20,pady=20)
+        self.frame_options_but = Frame(self.root,name='dialog_edit',padx=20,pady=20)
         self.root.title('Editar...')
-        frame.pack()
+        self.frame_options_but.pack()
         
-        label = Label(frame, text="Opciones:")
+        label = Label(self.frame_options_but, text="Opciones:")
         if self.estudio:        
-            self.ins_but = Button(frame, text="Insertar en base de datos", width=25, command=self.comparar)
-            self.sh_hist = Button(frame, text="Mostrar histograma", width=25, command=self.show_hist)
-            self.del_but = Button(frame, text="Descartar mariposa", width=25, command=self.delete_but) 
+            self.ins_but = Button(self.frame_options_but, text="Insertar en base de datos", width=25, command=self.insert_but)
+            self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=25, command=self.show_hist)
+            self.del_but = Button(self.frame_options_but, text="Descartar mariposa", width=25, command=self.delete_but) 
                        
             label.grid(row=0, column=0)        
             self.ins_but.grid(row=1, column=0)
             self.sh_hist.grid(row=2, column=0)
             self.del_but.grid(row=3, column=0)
         else:
-            self.buts_col = Button(frame, text="Mostrar mariposas de color parecido", width=35, command=self.comparar)
-            self.buts_shape = Button(frame, text="Mostrar mariposas de forma parecida", width=35, command=self.comparar)
-            self.sh_hist = Button(frame, text="Mostrar histograma", width=35, command=self.show_hist)
-            self.del_but = Button(frame, text="Eliminar mariposa", width=35, command=self.delete_but) 
+            self.buts_col = Button(self.frame_options_but, text="Mostrar mariposas de color parecido", width=35, command=self.comparar)
+            self.buts_shape = Button(self.frame_options_but, text="Mostrar mariposas de forma parecida", width=35, command=self.comparar)
+            self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=35, command=self.show_hist)
+            self.del_but = Button(self.frame_options_but, text="Eliminar mariposa", width=35, command=self.delete_but) 
                        
             label.grid(row=0, column=0)        
             self.buts_col.grid(row=1, column=0)
@@ -580,7 +588,25 @@ class MenuDemo(ttk.Frame):
         '''TODO'''
         MenuDemo._instance_but_act = None
         self.root.destroy()
-                      
+    
+    #Insertamos una nueva mariposa en la base de datos    
+    def insert_but(self):
+        s = tkMessageBox.askquestion(None, "Desea introducir este ejemplar en la coleccion de "+self.col_act+'?')
+        if s == 'yes':
+            #Cerramos la ventana de opciones
+            MenuDemo._instance_but_act = None
+            self.root.destroy()           
+            #Le damos cania a la barra de progreso          
+            self.progress_bar.start(30)
+            self.progress_bar.config(text='Resizing...')
+            '''TODO resize''' 
+            self.db.new_but(self.but_act)
+            self.update_frame_but(self.but_act.get_min_img())
+            
+            
+            
+            
+            
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):
     aux = 0
