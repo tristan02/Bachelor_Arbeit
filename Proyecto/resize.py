@@ -80,7 +80,7 @@ def find_0_3(img_o):
     sol = v3[0]-v0[0]
     
     img = img_o    
-    return sol
+    return sol,img
 
 '''image_name = "img_v.jpg"
 haystack = cv2.imread(image_name)

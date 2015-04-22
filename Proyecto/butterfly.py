@@ -37,7 +37,7 @@ class butterfly:
         self.w = self.pil_img.width()
         self.h = self.pil_img.height()
         #Creamos la imagen en miniatura
-        aux = cv2.resize(img,(self.w/4, self.h/4), interpolation = cv2.INTER_CUBIC)
+        aux = cv2.resize(img,(self.w/2, self.h/2), interpolation = cv2.INTER_CUBIC)
         self.min_img = ImageTk.PhotoImage(Image.fromarray(aux))
         self.set_mask()
     

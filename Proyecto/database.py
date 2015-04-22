@@ -36,7 +36,7 @@ class database:
         self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}
         
     #Agregamos una nueva mariposa sin procesar a la base de datos
-    def new_but(self,but):
+    def new_but(self,but,col):
         new = True
         for elem in self.data_unchecked:
             n1 = but.get_name()
@@ -44,7 +44,10 @@ class database:
             if n1 == n2:
                 new = False
         if new:        
-            self.data_unchecked.append(but)
+            aux = []
+            aux = self.data_checked[col]
+            aux.append(but)
+            self.data_checked[col] = aux
             return 0
         else:
             return -1

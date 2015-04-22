@@ -22,6 +22,8 @@ def get_contour(contours,w,h):
     max2 = 0
     for c in contours:
         #Sacamos el centroide para ver si es contorno de mariposa
+        '''TODO:No se si es correcto inicializar a false...'''
+        centro = False
         M = cv2.moments(c) 
         if M['m00'] != 0:
             cx = int(M['m10']/M['m00'])

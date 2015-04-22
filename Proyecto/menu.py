@@ -26,9 +26,8 @@ import ScrolledText
  
 class MenuDemo(ttk.Frame):
     
-    w = Null
     but_act = Null
-    frame = Null
+    col_act = '-'
     panel = Null
     grid = Null
     img = Null
@@ -38,12 +37,12 @@ class MenuDemo(ttk.Frame):
     _instance_new_col = None
     _instance_but_act = None
     new_col = None
-    e1 = None
     img = Null
     Colecciones = None
-    btn_cols = {}
-    col_act = '-'
+    btn_cols = {}    
     estudio = False
+    dist03 = 0
+    index_but_act = 0
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
@@ -324,10 +323,10 @@ class MenuDemo(ttk.Frame):
             s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
             self.but_act.set_broken(s)
             self.update_frame_new_but(self.but_act.get_min_img())
-            if self.db.new_but(self.but_act) == -1:
+            '''if self.db.new_but(self.but_act) == -1:
                 tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
             else:
-                tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")
+                tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")'''
         else:
             s = tkMessageBox.askquestion(None, "Existe una mariposa pendiente de estudio. Desea descartarla?")
             if s == 'yes':
@@ -375,22 +374,28 @@ class MenuDemo(ttk.Frame):
         
     def next_but(self):
         if not(self.estudio) and self.but_act != Null:
-            if self.index_but_act != self.count_buts:
-                self.index_but_act = self.index_but_act + 1
-            else:
-                self.index_but_act = 0
-            
-            self.but_act = self.buts[self.index_but_act]     
-            self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+            try:
+                if self.index_but_act != self.count_buts:
+                    self.index_but_act = self.index_but_act + 1
+                else:
+                    self.index_but_act = 0
+                       
+                self.but_act = self.buts[self.index_but_act]     
+                self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+            except TclError:
+                pass 
         
     def prev_but(self):
         if not(self.estudio) and self.but_act != Null:
-            if self.index_but_act != 0:
-                self.index_but_act = self.index_but_act - 1
-            else:
-                self.index_but_act = self.count_buts
-            self.but_act = self.buts[self.index_but_act] 
-            self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+            try:
+                if self.index_but_act != 0:
+                    self.index_but_act = self.index_but_act - 1
+                else:
+                    self.index_but_act = self.count_buts
+                self.but_act = self.buts[self.index_but_act] 
+                self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+            except TclError:
+                pass 
         
     def show_masks(self):        
         c = self.db.get_count_but()
@@ -400,11 +405,7 @@ class MenuDemo(ttk.Frame):
      
     #De momento abrimos una ventana con el histograma de cada mariposa       
     def show_hist(self):
-        '''TODO'''
-        c = self.db.get_count_but()
-        for i in range(c):
-            but = self.db.get_but(i)
-            cv2.imshow(but.get_name(), but.get_hist())
+        cv2.imshow(self.but_act.get_name(), self.but_act.get_hist())
         MenuDemo._instance_but_act = None
         self.root.destroy()
     
@@ -432,18 +433,25 @@ class MenuDemo(ttk.Frame):
         d = d/(c-error)
         self.db.reescale_bd(d)
         
-    def refresh_panel(self,img):        
-        if self.panel != Null:
-            self.panel.destroy()
-        try:
-            self.frame.destroy()
-            self.frame = Frame(self.w)
-            self.panel = Label(self.frame, image = img)
-            self.frame.pack()
-            self.panel.pack(side = "top", fill = "none", expand = "yes")
-            
-        except IOError:
-            self.panel.destroy()
+    def resize_but(self):
+        dist,img_03 = find_0_3(self.but_act.get_np_img())
+        cv2.imshow('dist03', img_03)
+        cv2.waitKey()
+        cv2.destroyWindow('dist03')
+        
+        '''TODO: En una ventana poder cerciorarse que una imagen esta bien cogida la dist
+        
+        im = Image.fromarray(img_03)
+        imh = ImageTk.PhotoImage(im)
+        
+        ventana_dist03 = Tk()
+        frame_dist03_img = Frame(ventana_dist03)
+        frame_dist03_dialog = Frame(ventana_dist03)      
+        frame_dist03_img.pack(side = TOP)
+        frame_dist03_dialog.pack(side = BOTTOM)
+        
+        label_img_dist03 = Label(frame_dist03_img)
+        label_img_dist03.pack(side = "bottom", fill = "both", expand = "yes")'''
             
     def update_frame_new_but(self,img):
         self.btn_act_but.config(image=img,text='Mariposa pendiente de estudio')          
@@ -597,10 +605,12 @@ class MenuDemo(ttk.Frame):
             MenuDemo._instance_but_act = None
             self.root.destroy()           
             #Le damos cania a la barra de progreso          
-            self.progress_bar.start(30)
-            self.progress_bar.config(text='Resizing...')
+            self.progress_bar.start(5)
             '''TODO resize''' 
-            self.db.new_but(self.but_act)
+            self.resize_but()
+            self.progress_bar.stop()
+            self.db.new_but(self.but_act,self.col_act)
+            self.estudio = False
             self.update_frame_but(self.but_act.get_min_img())
             
             
