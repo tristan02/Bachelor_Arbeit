@@ -18,12 +18,13 @@ class database:
     
     data_collection = []
     data_unchecked = []
-    data_checked = []
+    data_checked = {}
     num_but = 0
     num_col = 0
+    d = 0
     
     def __init__(self):
-        col1 = collection(None,'Europa','Esta collection es muy completa. Es la hostia.')
+        '''col1 = collection(None,'Europa','Esta collection es muy completa. Es la hostia.')
         col2 = collection(None,'Africa','Esta collection es muy completa. Es la hostia.')
         self.data_collection.append(col1)
         self.data_collection.append(col2)
@@ -33,7 +34,7 @@ class database:
         i = np.array(Image.open('img (3).jpg'))
         but2 = butterfly(i,'but2')
         
-        self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}
+        self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}'''
         
     #Agregamos una nueva mariposa sin procesar a la base de datos
     def new_but(self,but,col):
@@ -48,7 +49,7 @@ class database:
             aux = self.data_checked[col]
             aux.append(but)
             self.data_checked[col] = aux
-            self.reescale_bd(but.get_dist03())
+            #self.reescale_bd(but.get_dist03())
             return 0
         else:
             return -1
@@ -88,19 +89,36 @@ class database:
                 return (elem.get_info(),elem.get_img())
         return ('0','0')
             
-    def reescale_bd(self,d):
-        for elem in self.data_unchecked:
-            if not((elem.get_dist03() + 3) > d and (elem.get_dist03() - 3) < d):
-                elem.reescale(d)
+    def reescale_bd(self):
+        self.d = 0
+        error = 0
+        c = self.db.get_count_but()
+        for i in range(c):
+            but = self.db.get_but(i)
+            #Si la imagen ya ha sido reescalada no buscamos su distancia pues ya la sabemos but.dist03
+            dist = but.get_dist03()
+            #Si la medida sale mal la sacamos de la media
+            if dist > 10:
+                self.d = self.d + dist
+            else:
+                ''''TODO Si no se ha detectado bien el 03 hay que hacer algo!'''
+                #self.db.delete_but(but)
+                error = error + 1
+        self.d = self.d/(c-error)
+        
+        for elem in self.data_checked:
+            if not((elem.get_dist03() + 3) > self.d and (elem.get_dist03() - 3) < d):
+                elem.reescale(self.d)
             if elem.get_centroide() != 0:
                 elem.reescale_mask()
+        print self.d
             
     #Sacamos
-    def get_last_but_uncp(self):
+    def get_last_but_unch(self):
         return self.data_unchecked.pop()
     
     def get_count_but(self):
-        return len(self.data_unchecked)
+        return len(self.data_checked)
     
     def get_but(self,i):
         if i < self.get_count_but():

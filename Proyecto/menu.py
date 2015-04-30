@@ -126,13 +126,7 @@ class MenuDemo(ttk.Frame):
         self.btn_act_col = Button(self.Coleccion,name='btn_act_col', width=20, text='Coleccion actual: '+self.col_act, default=ACTIVE, command=self.show_info_col)
         self.btn_act_col.focus()
         self.btn_act_col.pack(side=BOTTOM,padx=25, pady=25)
-        
-        #Barra de progeso
-        ft = ttk.Frame()            
-        ft.pack(expand=True, fill=BOTH, side=TOP)             
-        self.progress_bar = ttk.Progressbar(ft, orient='horizontal', mode='determinate')             
-        self.progress_bar.pack(expand=True, fill=BOTH, side=TOP) 
-        
+              
                  
         # create statusbar
         statusBar = Frame()
@@ -159,9 +153,9 @@ class MenuDemo(ttk.Frame):
         #    3. add the submenu's individual items
          
         self._add_file_menu()
-        self._add_basic_menu()
+        '''self._add_basic_menu()
         self._add_collection_menu()
-        #self._add_colors_menu()
+        #self._add_colors_menu()'''
  
     # ================================================================================
     # Submenu routines
@@ -311,22 +305,25 @@ class MenuDemo(ttk.Frame):
     
     #Carga una imagen deseada, crea una mariposa, la muestra, pregunta si esta rota y la guarda en la bd
     def load_but(self):
-        if not(self.estudio):
-            self.estudio = True
-            b = str(askopenfile())
-            path = get_path(b)
-            i = np.array(Image.open(path))
-            #Creamos la mariposa
-            name = 'ima/' + os.path.basename(path)
-            self.but_act = butterfly(i,name)
-            
-            s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
-            self.but_act.set_broken(s)
-            self.update_frame_new_but(self.but_act.get_min_img())
-            '''if self.db.new_but(self.but_act) == -1:
-                tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
-            else:
-                tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")'''
+        if not(self.estudio):            
+            try:
+                self.estudio = True
+                b = str(askopenfile())
+                path = get_path(b)
+                i = np.array(Image.open(path))
+                #Creamos la mariposa
+                name = 'ima/' + os.path.basename(path)
+                self.but_act = butterfly(i,name)
+                
+                s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
+                self.but_act.set_broken(s)
+                self.update_frame_new_but(self.but_act.get_min_img())
+                '''if self.db.new_but(self.but_act) == -1:
+                    tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
+                else:
+                    tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")'''
+            except:
+                self.estudio = False
         else:
             s = tkMessageBox.askquestion(None, "Existe una mariposa pendiente de estudio. Desea descartarla?")
             if s == 'yes':
@@ -341,7 +338,7 @@ class MenuDemo(ttk.Frame):
             else:
                 tkMessageBox.showinfo(None, "Ninguna mariposa para procesar")
         else:
-            tkMessageBox.showinfo(None, "Seleccione primero una coleccion, o cargue una mariposa nueva!")
+            tkMessageBox.showinfo(None, "Seleccione primero una coleccion, o cree una nueva!")
         
     def new_col(self):
         if self._instance_new_col == None:
@@ -380,7 +377,8 @@ class MenuDemo(ttk.Frame):
                 else:
                     self.index_but_act = 0
                        
-                self.but_act = self.buts[self.index_but_act]     
+                self.but_act = self.buts[self.index_but_act]  
+                print str(self.but_act.get_dist03()) 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
             except TclError:
                 pass 
@@ -407,7 +405,7 @@ class MenuDemo(ttk.Frame):
     def show_hist(self):
         cv2.imshow(self.but_act.get_name(), self.but_act.get_hist())
         MenuDemo._instance_but_act = None
-        self.root.destroy()
+        self.win_new_but.destroy()
     
     #Para intentar perder la menor informacion posible sobre las imagenes,
     # el nuevo tamanyo sera segun la media de las distancias
@@ -433,25 +431,40 @@ class MenuDemo(ttk.Frame):
         d = d/(c-error)
         self.db.reescale_bd(d)
         
-    def resize_but(self):
-        dist,img_03 = find_0_3(self.but_act.get_np_img())
-        cv2.imshow('dist03', img_03)
-        cv2.waitKey()
-        cv2.destroyWindow('dist03')
-        
-        '''TODO: En una ventana poder cerciorarse que una imagen esta bien cogida la dist
+    def get_dist03_but(self):
+        self.dist03,img_03 = find_0_3(self.but_act.get_np_img())
         
         im = Image.fromarray(img_03)
         imh = ImageTk.PhotoImage(im)
         
-        ventana_dist03 = Tk()
-        frame_dist03_img = Frame(ventana_dist03)
-        frame_dist03_dialog = Frame(ventana_dist03)      
-        frame_dist03_img.pack(side = TOP)
-        frame_dist03_dialog.pack(side = BOTTOM)
+        self.ventana_dist03 = Toplevel()
+        frame_dist03_img = Frame(self.ventana_dist03)
+        frame_dist03_dialog = Frame(self.ventana_dist03)
+              
+        frame_dist03_img.pack(side = BOTTOM)
+        frame_dist03_dialog.pack(side = TOP)
         
-        label_img_dist03 = Label(frame_dist03_img)
-        label_img_dist03.pack(side = "bottom", fill = "both", expand = "yes")'''
+        lbl_img_dist03 = Label(frame_dist03_img, image=imh)
+        lbl_img_dist03.image = imh
+        lbl_img_dist03.pack(side = "bottom", fill = "both", expand = "yes")
+        
+        lbl_description_dist03 = Label(frame_dist03_dialog, text='Deberian verse dos puntos. Uno rojo en el 0 y otro verde en el 3 de la regla.')
+        lbl_description_dist03.grid(row=0)
+        
+        btn_yes_dist03 = Button(frame_dist03_dialog, name='btn_yes_dist03', text = 'Se muestran correctamente',bg = "green", default=ACTIVE, command=self.good_dist03)
+        btn_no_dist03 = Button(frame_dist03_dialog, name='btn_no_dist03', text = 'No se muestran correctamente',bg = "red", command=self.bad_dist03)
+        btn_yes_dist03.grid(row=1, column=0)
+        btn_no_dist03.grid(row=1, column=1)
+        
+        '''TODO: Recolocar botones y mensaje. Dejarlo bonito'''
+        
+    def good_dist03(self):
+        self.ventana_dist03.destroy()
+        self.but_act.set_dist03(self.dist03)
+   
+    def bad_dist03(self):
+        pass
+    '''TODO'''
             
     def update_frame_new_but(self,img):
         self.btn_act_but.config(image=img,text='Mariposa pendiente de estudio')          
@@ -511,9 +524,9 @@ class MenuDemo(ttk.Frame):
         
     #Funcion para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
     def dialog_new_col(self):
-        self.new_col = Tk()
-        frame = Frame(self.new_col,name='dialog_new_col', width=200, height=200)
-        self.new_col.title('Nueva coleccion...')
+        self.win_new_col = Toplevel()
+        frame = Frame(self.win_new_col,name='dialog_new_col', width=200, height=200)
+        self.win_new_col.title('Nueva coleccion...')
         frame.pack()
     
         label1 = Label(frame, text="Nombre de la nueva coleccion:",padx=20,pady=20) 
@@ -532,7 +545,7 @@ class MenuDemo(ttk.Frame):
         
         self._instance_new_col = self
             
-        self.new_col.mainloop() 
+        self.win_new_col.mainloop() 
         
     def crear_col(self):        
         nom = self.e1.get()
@@ -541,8 +554,8 @@ class MenuDemo(ttk.Frame):
         self.db.new_col(col)
         self._instance_new_col = None
         self.update_cols(nom)
-        self.new_col.destroy() 
-        self.new_col = None
+        self.win_new_col.destroy() 
+        self.win_new_col = None
         
     def foto_col(self):
         f = str(askopenfile())
@@ -550,9 +563,9 @@ class MenuDemo(ttk.Frame):
         self.img = np.array(Image.open(path))       
 
     def dialog_edit_but(self):
-        self.root = Tk()
-        self.frame_options_but = Frame(self.root,name='dialog_edit',padx=20,pady=20)
-        self.root.title('Editar...')
+        self.win_new_but = Toplevel()
+        self.frame_options_but = Frame(self.win_new_but,name='dialog_edit',padx=20,pady=20)
+        self.win_new_but.title('Editar...')
         self.frame_options_but.pack()
         
         label = Label(self.frame_options_but, text="Opciones:")
@@ -579,7 +592,7 @@ class MenuDemo(ttk.Frame):
         
         MenuDemo._instance_but_act = self
             
-        self.root.mainloop()   
+        self.win_new_but.mainloop()   
         
     def delete_but(self):
         s = tkMessageBox.askquestion(None, "Esta seguro que quiere eliminar permanentemente este ejemplar?")
@@ -590,12 +603,12 @@ class MenuDemo(ttk.Frame):
             self.update_frame_but(self.no_img)
             self._instance_but_act = None
             self.estudio = False
-            self.root.destroy()
+            self.win_new_but.destroy()
                             
     def comparar(self):
         '''TODO'''
         MenuDemo._instance_but_act = None
-        self.root.destroy()
+        self.win_new_but.destroy()
     
     #Insertamos una nueva mariposa en la base de datos    
     def insert_but(self):
@@ -603,12 +616,9 @@ class MenuDemo(ttk.Frame):
         if s == 'yes':
             #Cerramos la ventana de opciones
             MenuDemo._instance_but_act = None
-            self.root.destroy()           
-            #Le damos cania a la barra de progreso          
-            self.progress_bar.start(5)
+            self.win_new_but.destroy()           
             '''TODO resize''' 
-            self.resize_but()
-            self.progress_bar.stop()
+            self.get_dist03_but()
             self.db.new_but(self.but_act,self.col_act)
             self.estudio = False
             self.update_frame_but(self.but_act.get_min_img())
