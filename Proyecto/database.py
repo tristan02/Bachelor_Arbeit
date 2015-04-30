@@ -48,6 +48,7 @@ class database:
             aux = self.data_checked[col]
             aux.append(but)
             self.data_checked[col] = aux
+            self.reescale_bd(but.get_dist03())
             return 0
         else:
             return -1
