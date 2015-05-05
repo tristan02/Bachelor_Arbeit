@@ -24,12 +24,10 @@ from _warnings import default_action
 import ScrolledText
 
  
-class MenuDemo(ttk.Frame):
-    
+class MenuDemo(ttk.Frame):    
     but_act = Null
     col_act = '-'
     panel = Null
-    grid = Null
     img = Null
     btn_act_but = Null
     btn_act_col = Null
@@ -51,7 +49,9 @@ class MenuDemo(ttk.Frame):
         self.db = database()
         im = Image.open('no-image.png')
         self.no_img = ImageTk.PhotoImage(im)
-        self._create_panel()        
+        self._create_panel() 
+        '''TODO: al cerrar la ventana con la x de toda la vida deberia direccionarnos directamente a on_closing'''
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
     
     def _create_panel(self):
         Panel = Frame(self, name='panel')
@@ -172,8 +172,7 @@ class MenuDemo(ttk.Frame):
         #filemenu.add_command(label="Save Database", command=self.db.save_db)
         filemenu.add_command(label="Close", command=self.close_but)   
         filemenu.add_separator()
-        filemenu.add_command(label='Exit',
-                          command=lambda: self.master.destroy()) # kill toplevel wnd
+        filemenu.add_command(label='Exit', command=self.on_closing) # kill toplevel wnd
          
     # Basic menu ------------------------------------------------------------------       
     def _add_basic_menu(self):
@@ -346,10 +345,12 @@ class MenuDemo(ttk.Frame):
             '''self.update_cols()'''
             
     def show_info_col(self):
-        '''TODO'''
-        (info,img) = self.db.get_info_col(self.col_act)
-        tkMessageBox._show(self.col_act, info)
-        
+        '''TODO: Opciones para eliminar/editar una coleccion a parte de mostrar informacion etc'''
+        if not(self.col_act == '-'):
+            (info,img) = self.db.get_info_col(self.col_act)
+            tkMessageBox._show(self.col_act, info)
+        else:
+            tkMessageBox.showinfo('None', 'Ninguna coleccion para cargar. Cree una.')
     def close_but(self):
         if self.panel != Null:
             self.panel.destroy()
@@ -437,9 +438,10 @@ class MenuDemo(ttk.Frame):
         im = Image.fromarray(img_03)
         imh = ImageTk.PhotoImage(im)
         
-        self.ventana_dist03 = Toplevel()
-        frame_dist03_img = Frame(self.ventana_dist03)
-        frame_dist03_dialog = Frame(self.ventana_dist03)
+        self.win_dist03 = Toplevel()
+        #self.win_dist03.protoco("WM_DELETE_WINDOW", "onexit")
+        frame_dist03_img = Frame(self.win_dist03)
+        frame_dist03_dialog = Frame(self.win_dist03)
               
         frame_dist03_img.pack(side = BOTTOM)
         frame_dist03_dialog.pack(side = TOP)
@@ -448,7 +450,7 @@ class MenuDemo(ttk.Frame):
         lbl_img_dist03.image = imh
         lbl_img_dist03.pack(side = "bottom", fill = "both", expand = "yes")
         
-        lbl_description_dist03 = Label(frame_dist03_dialog, text='Deberian verse dos puntos. Uno rojo en el 0 y otro verde en el 3 de la regla.')
+        lbl_description_dist03 = Label(frame_dist03_dialog, text='Deberian verse dos puntos azules. Uno en el 0 y otro en el 3 de la regla.')
         lbl_description_dist03.grid(row=0)
         
         btn_yes_dist03 = Button(frame_dist03_dialog, name='btn_yes_dist03', text = 'Se muestran correctamente',bg = "green", default=ACTIVE, command=self.good_dist03)
@@ -459,15 +461,15 @@ class MenuDemo(ttk.Frame):
         '''TODO: Recolocar botones y mensaje. Dejarlo bonito'''
         
     def good_dist03(self):
-        self.ventana_dist03.destroy()
+        self.win_dist03.destroy()
         self.but_act.set_dist03(self.dist03)
    
     def bad_dist03(self):
         pass
-    '''TODO'''
+        '''TODO'''
             
     def update_frame_new_but(self,img):
-        self.btn_act_but.config(image=img,text='Mariposa pendiente de estudio')          
+        self.btn_act_but.config(image=img,fg='red', text='Mariposa pendiente de estudio')          
         self.btn_act_but['compound'] = BOTTOM  
     
     #Actualizamos el frame central con una nueva imagen y quitamos la etqiqueta 'en estudio' en caso de que ya no sea precisa    
@@ -525,6 +527,7 @@ class MenuDemo(ttk.Frame):
     #Funcion para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
     def dialog_new_col(self):
         self.win_new_col = Toplevel()
+        self.win_new_col.protocol("WM_DELETE_WINDOW", "onexit")
         frame = Frame(self.win_new_col,name='dialog_new_col', width=200, height=200)
         self.win_new_col.title('Nueva coleccion...')
         frame.pack()
@@ -564,6 +567,7 @@ class MenuDemo(ttk.Frame):
 
     def dialog_edit_but(self):
         self.win_new_but = Toplevel()
+        self.win_new_but.protocol("WM_DELETE_WINDOW", "onexit")
         self.frame_options_but = Frame(self.win_new_but,name='dialog_edit',padx=20,pady=20)
         self.win_new_but.title('Editar...')
         self.frame_options_but.pack()
@@ -606,7 +610,7 @@ class MenuDemo(ttk.Frame):
             self.win_new_but.destroy()
                             
     def comparar(self):
-        '''TODO'''
+        '''TODO:Bastante curro'''
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
     
@@ -623,9 +627,12 @@ class MenuDemo(ttk.Frame):
             self.estudio = False
             self.update_frame_but(self.but_act.get_min_img())
             
-            
-            
-            
+    def on_closing(self):
+        try:
+            self.db.save_db(self.col_act)
+        except: 
+            print 'Error 285'
+        self.master.destroy()   
             
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador
 def get_path(s):

@@ -13,7 +13,6 @@ from Proyecto.get_histogram import get_hist
 
 class butterfly:
     broken = False
-    checked = False
     #TODO quitar reescaled. no sirve de mucho. mejor basarse en si tenemos o no la distancia 03 real y ya esta.
     reescaled = False
     orig_img = Null
@@ -106,9 +105,6 @@ class butterfly:
     def get_broken(self):
         return self.broken
     
-    def get_checked(self):
-        return self.checked
-    
     def get_reescaled(self):
         return self.reescaled
     
@@ -117,16 +113,15 @@ class butterfly:
     
     def get_centroide(self):
         return self.centroide
-       
+    
+    def get_area(self):
+        return self.area
+    
     def set_dist03(self,d):
         self.dist03 = d
         
     def set_centroide(self,x,y):
         self.centroide = (x,y)
-    
-    def set_checked(self,c):
-        if c == 'True':
-            self.checked = True
             
     def set_reescaled(self,c):
         if c == 'True':

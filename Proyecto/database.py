@@ -107,7 +107,7 @@ class database:
         self.d = self.d/(c-error)
         
         for elem in self.data_checked:
-            if not((elem.get_dist03() + 3) > self.d and (elem.get_dist03() - 3) < d):
+            if not((elem.get_dist03() + 3) > self.d and (elem.get_dist03() - 3) < self.d):
                 elem.reescale(self.d)
             if elem.get_centroide() != 0:
                 elem.reescale_mask()
@@ -124,16 +124,25 @@ class database:
         if i < self.get_count_but():
             return self.data_unchecked[i]
     
-    def save_db(self):
+    def save_db(self,last_col):
         file = open('db.txt','w')
-        file.write(str(self.get_count_but()) + '\n')
-        
-        for elem in self.data_unchecked:
-            file.write(elem.get_name() + '\n')
-            file.write(str(elem.get_broken()) + '\n')
-            file.write(str(elem.get_checked()) + '\n')
-            file.write(str(elem.get_reescaled()) + '\n')
-            
+        file.write(str(len(self.get_cols())) + '\n')
+               
+        for col in self.data_collection:
+            buts = self.get_buts_col(col.get_name())                        
+            file.write(col.get_name() + '\n')
+            file.write(col.get_info() + '\n')
+            #file.write(col.get_img() + '\n')  
+            file.write(str(len(buts)) + '\n')
+                      
+            for elem in buts:               
+                file.write(elem.get_name() + '\n')
+                file.write(str(elem.get_broken()) + '\n')
+                x,y = elem.get_centroide()
+                file.write(str(x) + ',' + str(y) + '\n')
+                file.write(str(elem.get_dist03()) + '\n')
+                file.write(str(elem.get_area()) + '\n')
+                file.write(str(elem.get_reescaled()) + '\n')            
         file.close()
         
     def load_db(self,path):
@@ -161,8 +170,7 @@ class database:
             self.new_but(b)
             
     def delete_db(self):
-        #Hay que destruir todas las mariposas????
-        self.data_unchecked = []
+        self.data_checked = {}
         
         
         

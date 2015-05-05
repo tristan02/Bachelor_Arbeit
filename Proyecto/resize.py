@@ -75,8 +75,8 @@ def find_0_3(img_o):
                 if v0[0] > x or v0[1] < y:
                     v0 = [x,y]
     #print str(v0[0]) + '---->' + str(v0[1])
-    cv2.circle(img,(v3[0],v3[1]), 10, (0,255,0), -1)
-    cv2.circle(img,(v0[0],v0[1]), 10, (255,0,0), -1)
+    cv2.circle(img,(v3[0],v3[1]), 10, (0,0,255), -1)
+    cv2.circle(img,(v0[0],v0[1]), 10, (0,0,255), -1)
     sol = v3[0]-v0[0]
     
     img = img_o    

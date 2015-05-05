@@ -1,17 +1,30 @@
-4
-ima/img (2).jpg
+1
+Europa
+Pues es que es la polla.
+
+ima/img (13).jpg
 True
+339,188
+206
+59038.5
 False
+2
+Asia
+Que te pasa chino de mierda?!
+
+ima/img (33).jpg
 False
-ima/img (6).jpg
+363,194
+278
+68782.5
 False
+ima/img (2).jpg
 False
+341,204
+152
+93566.5
 False
-ima/img (8).jpg
-False
-False
-False
-ima/img (14).jpg
-False
-False
-False
+0
+Africa
+Al del otro dia le hubiese reventao.
+
