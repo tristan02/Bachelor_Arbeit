@@ -19,9 +19,8 @@ from Proyecto.database import database
 from Proyecto.collection import collection
 import os
 from matplotlib.cbook import Null
-from doctest import master
-from _warnings import default_action
 import ScrolledText
+from Proyecto.get_histogram import compare_hist
 
  
 class MenuDemo(ttk.Frame):    
@@ -52,7 +51,6 @@ class MenuDemo(ttk.Frame):
         self._create_panel()         
         if self.db.get_col_act() != '-':
             self.set_col(self.db.get_col_act())
-        '''TODO: al cerrar la ventana con la x de toda la vida deberia direccionarnos directamente a on_closing'''
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
     
     def _create_panel(self):
@@ -140,29 +138,12 @@ class MenuDemo(ttk.Frame):
         # create the main menu (only displays if child of the 'root' window)
         self.master.option_add('*tearOff', False)  # disable all tearoff's
         self._menu = Menu(self.master, name='menu')
-        self._build_submenus()
         self.master.config(menu=self._menu)
          
-        # set up standard bindings for the Menu class
-        # (essentially to capture mouse enter/leave events)
-        self._menu.bind_class('Menu', '<<MenuSelect>>', self._update_status)
- 
-    def _build_submenus(self):
-        # create the submenus
-        # the routines are essentially the same:
-        #    1. create the submenu, passing the main menu as parent
-        #    2. add the submenu to the main menu as a 'cascade'
-        #    3. add the submenu's individual items
-         
         self._add_file_menu()
-        '''self._add_basic_menu()
-        self._add_collection_menu()
-        #self._add_colors_menu()'''
+ 
  
     # ================================================================================
-    # Submenu routines
-    # ================================================================================
- 
     # File menu ------------------------------------------------------------------               
     def _add_file_menu(self):
         filemenu = Menu(self._menu, name='filemenu')
@@ -175,112 +156,11 @@ class MenuDemo(ttk.Frame):
         filemenu.add_command(label="Close", command=self.close_but)   
         filemenu.add_separator()
         filemenu.add_command(label='Exit', command=self.on_closing) # kill toplevel wnd
-         
-    # Basic menu ------------------------------------------------------------------       
-    def _add_basic_menu(self):
-        bmenu = Menu(self._menu)
-        self._menu.add_cascade(menu=bmenu, label='Basic', underline=0)
-        bmenu.add_command(label='Long entry that does nothing')
-        labels = ['A', 'B', 'C', 'D', 'E', 'F']
-        for item in labels:
-            bmenu.add_command(label='Print letter "{}"'.format(item),
-                              underline=14,
-                              accelerator='Control+{}'.format(item),
-                              command=lambda i=item: self._print_it(None, i))
-             
-            # bind accelerator key to a method; the bind is on ALL the
-            # applications widgets
-            self.bind_all('<Control-{}>'.format(item.lower()),
-                            lambda e, i=item: self._print_it(e, i))
- 
-    # Cascades menu ------------------------------------------------------------------           
-    def _add_collection_menu(self):
-        collection = Menu(self._menu)
-        self._menu.add_cascade(label='Collection', menu=collection, underline=0)
-         
-        collection.add_command(label='Print Hello', underline=6,accelerator='Control+H',command=lambda: self._print_it(None, 'Hello'))
- 
-        collection.add_command(label='Print Goodbye', underline=6,accelerator='Control+G',command=lambda: self._print_it(None, 'Goodbye'))
- 
-        # add submenus       
-        self._add_casc_but(collection)    # check buttons
-        self._add_casc_rbs(collection)    # radio buttons
- 
-        # bind accelerator key to a method; the bind is on ALL the
-        # applications widgets
-        self.bind_all('<Control-h>',
-                        lambda e: self._print_it(e, 'Hello'))
-        self.bind_all('<Control-g>',
-                        lambda e: self._print_it(e, 'Goodbye'))
- 
-    def _add_casc_but(self, cascades):
-        # build the Cascades->Check Buttons submenu
-        check = Menu(cascades)
-        cascades.add_cascade(label='Check Buttons', underline=0,menu=check)
-         
-        self.__vars = {}
-        labels = ('Oil checked', 'Transmission checked','Brakes checked', 'Lights checked' )
- 
-        for item in labels:
-            self.__vars[item] = IntVar()
-            check.add_checkbutton(label=item, variable=self.__vars[item])
-             
-        # set items 1 and 3 to 'selected' state
-        check.invoke(1)
-        check.invoke(3)
-             
-        check.add_separator()
-        check.add_command(label='Show values',command=lambda lbls=labels: self._show_vars(lbls))
         
-    def _refresh_casc_cbs(self, cascades):
-        cascades.entryconfigure(1,'Bieeen')
-                     
-    def _add_casc_rbs(self, cascades):
-        # build Cascades->Radio Buttuns subment
-        submenu = Menu(cascades)
-        cascades.add_cascade(label='Radio Buttons', underline=0,menu=submenu)
+    
+    # ================================================================================
          
-        self.__vars['size'] = StringVar()
-        self.__vars['font'] = StringVar()
-         
-        for item in (10,14,18,24,32):
-            submenu.add_radiobutton(label='{} points'.format(item),variable=self.__vars['size'])
-             
-        submenu.add_separator()
-        '''TODO'''
-        conj = self.db.get_cols()
-        for i in conj:
-            donothing_callback()
-        for item in conj:
-            submenu.add_radiobutton(label=item,variable=self.__vars['font'])
-     
-        # set items 1 and 7 to 'selected' state
-        submenu.invoke(1)
-        submenu.invoke(7)
-             
-        submenu.add_separator()
-        submenu.add_command(label='Show values',command=lambda: self._show_vars(('size','font')))     
-     
-    # More menu ------------------------------------------------------------------   
-    def _add_more_menu(self):
-        menu = Menu(self._menu)
-        self._menu.add_cascade(label='More', menu=menu, underline=0)
-         
-        labels = ('An entry', 'Another entry', 'Does nothing','Does almost nothing', 'Make life meaningful')
-         
-        for item in labels:
-            menu.add_command(label=item,
-                             command=lambda i=item: self._you_invoked((i,'entry')))
-             
-        menu.entryconfig(3, bitmap='questhead', compound=LEFT,command=lambda i=labels[3]:self._you_invoked((i,'entry; a bitmap and a text string')))           
-           
-    # Colors menu ------------------------------------------------------------------          
-    def _add_colors_menu(self):
-        menu = Menu(self._menu, tearoff=True)
-        self._menu.add_cascade(label='Colors', menu=menu, underline=1)
-         
-        for c in ('red', 'orange', 'yellow', 'green', 'blue'):
-            menu.add_command(label=c, background=c,command=lambda c=c: self._you_invoked((c, 'color')))   
+       
             
     def reset_btn_act_but(self):
         im = Image.open('no-image.png')
@@ -315,7 +195,7 @@ class MenuDemo(ttk.Frame):
                 #Creamos la mariposa
                 name = 'ima/' + os.path.basename(path)
                 self.but_act = butterfly(i,name)
-                
+                #Preguntamos al usuario si sobre la integridad del ejemplar
                 s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
                 self.but_act.set_broken(s)
                 self.update_frame_new_but(self.but_act.get_min_img())
@@ -406,10 +286,11 @@ class MenuDemo(ttk.Frame):
      
     #De momento abrimos una ventana con el histograma de cada mariposa       
     def show_hist(self):
-        cv2.imshow(self.but_act.get_name(), self.but_act.get_hist())
+        cv2.imshow(self.but_act.get_name(), self.but_act.get_hist_img())
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
     
+    'TODO: El reescalado se debe hacer en la base de datos al aniadir nueva mariposa Este metodo sobra'
     #Para intentar perder la menor informacion posible sobre las imagenes,
     # el nuevo tamanyo sera segun la media de las distancias
     def resize(self):
@@ -489,43 +370,7 @@ class MenuDemo(ttk.Frame):
         self.db.load_db(path)
         self.refresh_grid()        
         
-    # ================================================================================
-    # Bound and Command methods
-    # ================================================================================               
-    def _print_it(self, e, txt):
-        # triggered by multiple menu items that print letters or greetings
-        # or by an accelerator keypress (Ctrl+a, Ctrl+b, etc).
-        print(txt)       
-         
-    def _update_status(self, evt):
-        # triggered on mouse entry if a menu item has focus
-        # (focus occurs when user clicks on a top level menu item)
-        '''try:
-            item = self.tk.eval('%s entrycget active -label' % evt.widget )
-            self.__status.configure(background='gray90', foreground='black',
-                                    text=item)
-        except TclError:
-            # no label available, ignore
-            pass'''
-         
-    def _show_vars(self, values):
-        # called when Cascades->Check Buttons or Radio Buttons
-        # 'Show Values' item is selected
-        # displayf variable values in the status bar
-        v = []
-        for e in values:
-            t = self.__vars[e].get()
-            s = '{}: {}  '.format(e, t)
-            v.append(s)
-         
-        self.__status.configure(background='white', foreground='black',
-                                text=''.join(v))
-     
-    def _you_invoked(self, value):
-        # triggered when an entry in the Icons, More or Colors menu is selected
-        self.bell()
-        self.__status.configure(background='SeaGreen1', foreground='black', text="You invoked the '{}' {}.".format(value[0],value[1]))
-        
+    
     #Funcion para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
     def dialog_new_col(self):
         self.win_new_col = Toplevel()
@@ -565,8 +410,12 @@ class MenuDemo(ttk.Frame):
     def foto_col(self):
         f = str(askopenfile())
         path = get_path(f)
-        self.img = np.array(Image.open(path))       
-
+        self.img = np.array(Image.open(path))      
+        
+    #==============================================================================================================
+    #FUNCIONES DE DIALOGOS
+    #==============================================================================================================
+    
     def dialog_edit_but(self):
         self.win_new_but = Toplevel()
         self.win_new_but.protocol("WM_DELETE_WINDOW", "onexit")
@@ -585,7 +434,7 @@ class MenuDemo(ttk.Frame):
             self.sh_hist.grid(row=2, column=0)
             self.del_but.grid(row=3, column=0)
         else:
-            self.buts_col = Button(self.frame_options_but, text="Mostrar mariposas de color parecido", width=35, command=self.comparar)
+            self.buts_col = Button(self.frame_options_but, text="Mostrar mariposas de color parecido", width=35, command=self.comp_color)
             self.buts_shape = Button(self.frame_options_but, text="Mostrar mariposas de forma parecida", width=35, command=self.comparar)
             self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=35, command=self.show_hist)
             self.del_but = Button(self.frame_options_but, text="Eliminar mariposa", width=35, command=self.delete_but) 
@@ -615,16 +464,40 @@ class MenuDemo(ttk.Frame):
         '''TODO:Bastante curro'''
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
-    
+        
+    def comp_color(self):
+        'TODO.. comparar todos los histogramas con el de la mariposa actual'
+        MenuDemo._instance_but_act = None
+        self.win_new_but.destroy()
+        h1 = self.but_act.get_hist()
+        s = tkMessageBox.askquestion(None, "Desea buscar similitudes con este ejemplar solo en la coleccion: "+self.col_act+'?')
+        if s == 'yes':
+            buts = self.db.get_buts_col(self.col_act)
+        else:
+            buts = self.db.get_buts()            
+        aux = 9999999999
+        similar_buts = []
+        most = None
+        for elem in buts:
+            if compare_hist(h1,elem.get_hist()) < aux and self.but_act != elem:
+                aux = compare_hist(h1,elem.get_hist())
+                print aux
+                similar_buts.append(elem)
+                most = elem
+        
+        cv2.imshow('La mas parecida', most.get_hist_img())
+        
+        
+        
     #Insertamos una nueva mariposa en la base de datos    
     def insert_but(self):
         s = tkMessageBox.askquestion(None, "Desea introducir este ejemplar en la coleccion de "+self.col_act+'?')
         if s == 'yes':
             #Cerramos la ventana de opciones
             MenuDemo._instance_but_act = None
-            self.win_new_but.destroy()           
-            '''TODO resize''' 
+            self.win_new_but.destroy()    
             self.get_dist03_but()
+            '''TODO resize. La cosa es que teniendo la nueva dist 03 ya podemos reescalar toda la base de datos''' 
             self.db.new_but(self.but_act,self.col_act)
             self.estudio = False
             self.update_frame_but(self.but_act.get_min_img())
@@ -633,7 +506,7 @@ class MenuDemo(ttk.Frame):
         try:
             self.db.save_db(self.col_act)
         except: 
-            print 'Error 285'
+            print 'Error al guardar la base de datos'
         self.master.destroy()   
             
 #Par de bucles para extraer la ruta de la imagen que hemos seleccionado en el explorador

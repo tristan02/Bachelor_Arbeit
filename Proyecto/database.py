@@ -18,7 +18,6 @@ from numpy.f2py.rules import aux_rules
 class database:
     
     data_collection = []
-    data_unchecked = []
     data_checked = {}
     num_but = 0
     num_col = 0
@@ -46,11 +45,7 @@ class database:
     #Agregamos una nueva mariposa sin procesar a la base de datos
     def new_but(self,but,col):
         new = True
-        for elem in self.data_unchecked:
-            n1 = but.get_name()
-            n2 = elem.get_name()
-            if n1 == n2:
-                new = False
+        'TODO: Comprobar que el nombre no esta repetido'
         if new:        
             aux = []
             aux = self.data_checked[col]
@@ -90,6 +85,15 @@ class database:
         i = self.data_checked[col]
         return i
     
+    def get_buts(self):
+        cols = self.get_cols()
+        buts = []
+        for col in cols:
+            buts_col = self.get_buts_col(col)
+            buts = buts + buts_col
+            
+        return buts
+    
     def get_info_col(self,col_act):
         for elem in self.data_collection:
             if col_act == elem.get_name():
@@ -119,17 +123,9 @@ class database:
             if elem.get_centroide() != 0:
                 elem.reescale_mask()
         print self.d
-            
-    #Sacamos
-    def get_last_but_unch(self):
-        return self.data_unchecked.pop()
     
     def get_count_but(self):
         return len(self.data_checked)
-    
-    def get_but(self,i):
-        if i < self.get_count_but():
-            return self.data_unchecked[i]
         
     def get_col_act(self):
         return self.col_act
@@ -153,8 +149,7 @@ class database:
                 file.write(str(x) + '\n')
                 file.write(str(y) + '\n')
                 file.write(str(elem.get_dist03()) + '\n')
-                file.write(str(elem.get_area()) + '\n')
-                file.write(str(elem.get_reescaled()) + '\n')            
+                file.write(str(elem.get_area()) + '\n')    
         file.close()
         
     def load_db(self,path):
@@ -206,23 +201,11 @@ class database:
                 area = float(area[:len(area)-1])
                 b.set_area(area)
                 
-                re = file.readline()
-                re = re[:len(re)-1]
-                b.set_reescaled(re)
-                
                 self.new_but(b,col.get_name())
         
         return 
             
     def delete_db(self):
         self.data_checked = {}
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        self.data_collection = []   
         

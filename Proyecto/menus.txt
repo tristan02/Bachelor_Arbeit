@@ -1,0 +1,105 @@
+# Basic menu ------------------------------------------------------------------       
+    def _add_basic_menu(self):
+        bmenu = Menu(self._menu)
+        self._menu.add_cascade(menu=bmenu, label='Basic', underline=0)
+        bmenu.add_command(label='Long entry that does nothing')
+        labels = ['A', 'B', 'C', 'D', 'E', 'F']
+        for item in labels:
+            bmenu.add_command(label='Print letter "{}"'.format(item),
+                              underline=14,
+                              accelerator='Control+{}'.format(item),
+                              command=lambda i=item: self._print_it(None, i))
+             
+            # bind accelerator key to a method; the bind is on ALL the
+            # applications widgets
+            self.bind_all('<Control-{}>'.format(item.lower()),
+                            lambda e, i=item: self._print_it(e, i))
+ 
+    # Cascades menu ------------------------------------------------------------------           
+    def _add_collection_menu(self):
+        collection = Menu(self._menu)
+        self._menu.add_cascade(label='Collection', menu=collection, underline=0)
+         
+        collection.add_command(label='Print Hello', underline=6,accelerator='Control+H',command=lambda: self._print_it(None, 'Hello'))
+ 
+        collection.add_command(label='Print Goodbye', underline=6,accelerator='Control+G',command=lambda: self._print_it(None, 'Goodbye'))
+ 
+        # add submenus       
+        self._add_casc_but(collection)    # check buttons
+        self._add_casc_rbs(collection)    # radio buttons
+ 
+        # bind accelerator key to a method; the bind is on ALL the
+        # applications widgets
+        self.bind_all('<Control-h>',
+                        lambda e: self._print_it(e, 'Hello'))
+        self.bind_all('<Control-g>',
+                        lambda e: self._print_it(e, 'Goodbye'))
+ 
+    def _add_casc_but(self, cascades):
+        # build the Cascades->Check Buttons submenu
+        check = Menu(cascades)
+        cascades.add_cascade(label='Check Buttons', underline=0,menu=check)
+         
+        self.__vars = {}
+        labels = ('Oil checked', 'Transmission checked','Brakes checked', 'Lights checked' )
+ 
+        for item in labels:
+            self.__vars[item] = IntVar()
+            check.add_checkbutton(label=item, variable=self.__vars[item])
+             
+        # set items 1 and 3 to 'selected' state
+        check.invoke(1)
+        check.invoke(3)
+             
+        check.add_separator()
+        check.add_command(label='Show values',command=lambda lbls=labels: self._show_vars(lbls))
+        
+    def _refresh_casc_cbs(self, cascades):
+        cascades.entryconfigure(1,'Bieeen')
+                     
+    def _add_casc_rbs(self, cascades):
+        # build Cascades->Radio Buttuns subment
+        submenu = Menu(cascades)
+        cascades.add_cascade(label='Radio Buttons', underline=0,menu=submenu)
+         
+        self.__vars['size'] = StringVar()
+        self.__vars['font'] = StringVar()
+         
+        for item in (10,14,18,24,32):
+            submenu.add_radiobutton(label='{} points'.format(item),variable=self.__vars['size'])
+             
+        submenu.add_separator()
+        '''TODO'''
+        conj = self.db.get_cols()
+        for i in conj:
+            donothing_callback()
+        for item in conj:
+            submenu.add_radiobutton(label=item,variable=self.__vars['font'])
+     
+        # set items 1 and 7 to 'selected' state
+        submenu.invoke(1)
+        submenu.invoke(7)
+             
+        submenu.add_separator()
+        submenu.add_command(label='Show values',command=lambda: self._show_vars(('size','font')))     
+     
+    # More menu ------------------------------------------------------------------   
+    def _add_more_menu(self):
+        menu = Menu(self._menu)
+        self._menu.add_cascade(label='More', menu=menu, underline=0)
+         
+        labels = ('An entry', 'Another entry', 'Does nothing','Does almost nothing', 'Make life meaningful')
+         
+        for item in labels:
+            menu.add_command(label=item,
+                             command=lambda i=item: self._you_invoked((i,'entry')))
+             
+        menu.entryconfig(3, bitmap='questhead', compound=LEFT,command=lambda i=labels[3]:self._you_invoked((i,'entry; a bitmap and a text string')))           
+           
+    # Colors menu ------------------------------------------------------------------          
+    def _add_colors_menu(self):
+        menu = Menu(self._menu, tearoff=True)
+        self._menu.add_cascade(label='Colors', menu=menu, underline=1)
+         
+        for c in ('red', 'orange', 'yellow', 'green', 'blue'):
+            menu.add_command(label=c, background=c,command=lambda c=c: self._you_invoked((c, 'color')))

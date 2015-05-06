@@ -10,21 +10,18 @@ True
 199.0
 208
 95137.5
-False
 ima/img (21).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (34).jpg
 False
 334.0
 207.0
 236
 69492.0
-False
 Asia
 Ahora se lia el taco!!
 
@@ -35,21 +32,18 @@ True
 199.0
 208
 95137.5
-False
 ima/img (29).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (35).jpg
 False
 334.0
 207.0
 236
 69492.0
-False
 Europe
 Theresia es una de las mas importantes. Estaba claro
 
@@ -60,14 +54,12 @@ True
 199.0
 208
 95137.5
-False
 ima/img (25).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (34).jpg
 False
 334.0
@@ -85,18 +77,15 @@ True
 199.0
 208
 95137.5
-False
 ima/img (2).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (3).jpg
 False
 334.0
 207.0
 236
 69492.0
-False

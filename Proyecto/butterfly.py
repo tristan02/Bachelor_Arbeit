@@ -13,14 +13,14 @@ from Proyecto.get_histogram import get_hist
 
 class butterfly:
     broken = False
-    #TODO quitar reescaled. no sirve de mucho. mejor basarse en si tenemos o no la distancia 03 real y ya esta.
-    reescaled = False
+    #Cada vez que reescalamos utilizaremos esta copia y asi no perdemos calidad
     orig_img = Null
     np_img = Null
     pil_img = Null
     min_img = Null
     mask_img = Null
     hist_img = Null
+    hist = []
     name = ''
     dist03 = 0
     area = 0
@@ -38,7 +38,10 @@ class butterfly:
         #Creamos la imagen en miniatura
         aux = cv2.resize(img,(self.w/2, self.h/2), interpolation = cv2.INTER_CUBIC)
         self.min_img = ImageTk.PhotoImage(Image.fromarray(aux))
-        self.set_mask()
+        #Sacamos la mascara, centroide y area
+        self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
+        #Calculamos el histograma con su imagen
+        self.hist_img,self.hist = get_hist(self.np_img,self.mask_img)
     
     #A partir de la medida entre el 0 y el 3 que son "3cmm" reescalamos a escala 2:1
     def reescale(self,d):
@@ -54,7 +57,8 @@ class butterfly:
         #Reescalamos la maskara
         self.reescale_mask()
     
-    #Basandonos en dist03 reescalamos las maskara  
+    #Basandonos en dist03 reescalamos las maskara
+    'TODO'  
     def reescale_mask(self):
         if self.area != 0:
             self.mask_img = cv2.resize(self.mask_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
@@ -64,23 +68,17 @@ class butterfly:
         return self.dist03
     
     def set_mask(self):
-        if self.area == 0 and not(self.reescaled):
-            self.mask_img,self.centroide,self.area = build_mask(self.np_img)
-        elif self.area == 0 and self.reescaled:
-            self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
-            self.reescale_mask()
+        self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
         
     def get_mask(self):
         #cv2.imwrite(self.name + '_mask.jpg', self.mask_img)
         return self.mask_img
     
-    def get_hist(self):
-        if self.area == 0 and not(self.reescaled):
-            self.set_mask()
-            self.hist_img = get_hist(self.np_img,self.mask_img)
-        else:
-            self.hist_img = get_hist(self.np_img,self.mask_img)
+    def get_hist_img(self):
         return self.hist_img
+    
+    def get_hist(self):
+        return self.hist
     
     #Getter de la imagen en np
     def get_np_img(self):

@@ -11,6 +11,7 @@ def get_hist(img,msk):
     b,g,r = cv2.split(img)
     bins = np.arange(256).reshape(256,1)
     color = [(255,0,0),(0,255,0),(0,0,255)]
+    hist_item = []
     
     for item,col in zip([b,g,r],color):
         hist_item = cv2.calcHist([item],[0],msk,[256],[0,255])
@@ -21,11 +22,12 @@ def get_hist(img,msk):
         cv2.polylines(h,[pts],False,col)
     
     h=np.flipud(h)
-    return h
+    return h, hist_item
 
 #Cuanto mas cercano a 0 mas parecido tendran
 def compare_hist(h1,h2):
     r = cv2.compareHist(h1, h2, cv2.cv.CV_COMP_CHISQR)    
     #TODO    
+    print r
     return r
 

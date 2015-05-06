@@ -1,5 +1,5 @@
-4
-Asia
+5
+Pruebas de color
 Europa
 Theresia es una de las mas importantes. Estaba claro
 
@@ -10,21 +10,18 @@ True
 199.0
 208
 95137.5
-False
 ima/img (21).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (34).jpg
 False
 334.0
 207.0
 236
 69492.0
-False
 Asia
 Ahora se lia el taco!!
 
@@ -35,21 +32,18 @@ True
 199.0
 208
 95137.5
-False
 ima/img (29).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (35).jpg
 False
 334.0
 207.0
 236
 69492.0
-False
 Europe
 Theresia es una de las mas importantes. Estaba claro
 
@@ -60,14 +54,12 @@ True
 199.0
 208
 95137.5
-False
 ima/img (25).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (34).jpg
 False
 334.0
@@ -75,8 +67,7 @@ False
 236
 69492.0
 False
-Asia central
-Ahora se lia el taco!!
+Asia centralAhora se lia el taco!!
 
 3
 ima/img (1).jpg
@@ -85,18 +76,37 @@ True
 199.0
 208
 95137.5
-False
 ima/img (2).jpg
 True
 341.0
 204.0
 152
 93566.5
-False
 ima/img (3).jpg
 False
 334.0
 207.0
 236
 69492.0
+Pruebas de color
+Vamos a ver si funciona
+
+3
+ima/img (5).jpg
 False
+337.0
+195.0
+202
+75467.5
+ima/img (12).jpg
+False
+339.0
+191.0
+199
+108407.0
+ima/img (45).jpg
+False
+339.0
+226.0
+423
+304650.0
