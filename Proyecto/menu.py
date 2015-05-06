@@ -49,7 +49,9 @@ class MenuDemo(ttk.Frame):
         self.db = database()
         im = Image.open('no-image.png')
         self.no_img = ImageTk.PhotoImage(im)
-        self._create_panel() 
+        self._create_panel()         
+        if self.db.get_col_act() != '-':
+            self.set_col(self.db.get_col_act())
         '''TODO: al cerrar la ventana con la x de toda la vida deberia direccionarnos directamente a on_closing'''
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
     

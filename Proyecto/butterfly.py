@@ -123,6 +123,9 @@ class butterfly:
     def set_centroide(self,x,y):
         self.centroide = (x,y)
             
+    def set_area(self,a):
+        self.area = a
+    
     def set_reescaled(self,c):
         if c == 'True':
             self.checked = True

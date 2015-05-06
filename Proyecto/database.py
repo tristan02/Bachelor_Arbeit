@@ -12,6 +12,7 @@ from matplotlib.cbook import Null
 from matplotlib.mlab import donothing_callback
 from collection import collection
 import os
+from numpy.f2py.rules import aux_rules
 
 
 class database:
@@ -22,6 +23,7 @@ class database:
     num_but = 0
     num_col = 0
     d = 0
+    col_act = '-'
     
     def __init__(self):
         '''col1 = collection(None,'Europa','Esta collection es muy completa. Es la hostia.')
@@ -35,6 +37,11 @@ class database:
         but2 = butterfly(i,'but2')
         
         self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}'''
+        
+        try:
+            self.load_db('db.txt')
+        except:
+            print ('Error de carga de base de datos')
         
     #Agregamos una nueva mariposa sin procesar a la base de datos
     def new_but(self,but,col):
@@ -123,15 +130,19 @@ class database:
     def get_but(self,i):
         if i < self.get_count_but():
             return self.data_unchecked[i]
-    
+        
+    def get_col_act(self):
+        return self.col_act
+        
     def save_db(self,last_col):
-        file = open('db.txt','w')
+        file = open('db.txt','w')        
         file.write(str(len(self.get_cols())) + '\n')
+        file.write(last_col  + '\n')
                
         for col in self.data_collection:
             buts = self.get_buts_col(col.get_name())                        
             file.write(col.get_name() + '\n')
-            file.write(col.get_info() + '\n')
+            file.write(col.get_info() + '\n' + '\n')
             #file.write(col.get_img() + '\n')  
             file.write(str(len(buts)) + '\n')
                       
@@ -139,35 +150,69 @@ class database:
                 file.write(elem.get_name() + '\n')
                 file.write(str(elem.get_broken()) + '\n')
                 x,y = elem.get_centroide()
-                file.write(str(x) + ',' + str(y) + '\n')
+                file.write(str(x) + '\n')
+                file.write(str(y) + '\n')
                 file.write(str(elem.get_dist03()) + '\n')
                 file.write(str(elem.get_area()) + '\n')
                 file.write(str(elem.get_reescaled()) + '\n')            
         file.close()
         
     def load_db(self,path):
-        file = open(path, 'r')
-        n = int(file.readline())
+        file = open(path, 'r')        
+        num_cols = int(file.readline())
+        self.col_act = file.readline()
+        self.col_act = self.col_act[:len(self.col_act)-1]
         
-        for i in range(n):
-            h = file.readline()
-            h = h[:len(h)-1]            
-            img = np.array(Image.open(h))
-            b = butterfly(img,h)
-            
-            br = file.readline()
-            br = br[:len(br)-1]
-            b.set_broken(br)
-            
-            ch = file.readline()
-            ch = ch[:len(ch)-1]
-            b.set_checked(ch)
-            
-            re = file.readline()
-            re = re[:len(re)-1]
-            b.set_reescaled(re)
-            
-            self.new_but(b)
+        for i in range(num_cols):
+            col_name = file.readline()
+            col_name = col_name[:len(col_name)-1]
+           
+            aux = file.readline()
+            col_info = ''
+            while (aux != '\n'):
+                aux = aux[:len(aux)-1]
+                col_info = col_info + aux
+                aux = file.readline()
+            #col_img = file.readline()            
+            col = collection(None,col_name,col_info)
+            self.new_col(col)
+            try:
+                num_buts = int(file.readline())
+            except:
+                file.readline()
+                num_buts = int(file.readline())
+                
+            for j in range(num_buts):
+                path = file.readline()
+                path = path[:len(path)-1]            
+                img = np.array(Image.open(path))
+                b = butterfly(img,path)
+                
+                br = file.readline()
+                br = br[:len(br)-1]
+                b.set_broken(br)
+                
+                centr_x = file.readline()
+                x = float(centr_x[:len(centr_x)-1])
+                centr_y = file.readline()
+                y = float(centr_y[:len(centr_y)-1])
+                b.set_centroide(x,y)
+                
+                d03 = file.readline()
+                d03 = int(d03[:len(d03)-1])
+                b.set_dist03(d03)
+                
+                area = file.readline()
+                area = float(area[:len(area)-1])
+                b.set_area(area)
+                
+                re = file.readline()
+                re = re[:len(re)-1]
+                b.set_reescaled(re)
+                
+                self.new_but(b,col.get_name())
+        
+        return 
             
     def delete_db(self):
         self.data_checked = {}
