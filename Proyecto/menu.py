@@ -40,6 +40,7 @@ class MenuDemo(ttk.Frame):
     estudio = False
     dist03 = 0
     index_but_act = 0
+    count_buts = 0
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
@@ -104,9 +105,12 @@ class MenuDemo(ttk.Frame):
         self.btn_prev_but.focus()
         #self.btn_prev_but.pack(side= LEFT)
         
+        self.lb_num_but = Label(Central, text=str(self.index_but_act) +' de '+ str(self.count_buts), wraplength='4i')
+        
         self.btn_prev_but.grid(row=0, column=1)
         self.btn_act_but.grid(row=0, column=2)
         self.btn_next_but.grid(row=0, column=3)
+        self.lb_num_but.grid(row=1, column=2)
         
         #Frame para seleccion de coleciones existenetes
         self.Colecciones = Frame(name='colecciones')
@@ -241,11 +245,13 @@ class MenuDemo(ttk.Frame):
         
     def show_buts(self,buts):
         if buts != []:
+            self.num_but_act = 1
             self.buts = buts
             self.but_act = self.buts[0] 
             self.update_frame_but(buts[0].get_min_img())
             self.index_but_act = 0 
             self.count_buts = len(buts)-1
+            self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
         else:
             self.buts = buts
             self.update_frame_but(buts)
@@ -260,6 +266,7 @@ class MenuDemo(ttk.Frame):
                 else:
                     self.index_but_act = 0
                        
+                self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
                 self.but_act = self.buts[self.index_but_act]  
                 print str(self.but_act.get_dist03()) 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
@@ -273,6 +280,7 @@ class MenuDemo(ttk.Frame):
                     self.index_but_act = self.index_but_act - 1
                 else:
                     self.index_but_act = self.count_buts
+                self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
                 self.but_act = self.buts[self.index_but_act] 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
             except TclError:

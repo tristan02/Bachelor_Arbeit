@@ -1,5 +1,5 @@
 5
-Pruebas de color
+Asia
 Europa
 Theresia es una de las mas importantes. Estaba claro
 
@@ -91,7 +91,7 @@ False
 Pruebas de color
 Vamos a ver si funciona
 
-3
+4
 ima/img (5).jpg
 False
 337.0
@@ -110,3 +110,9 @@ False
 226.0
 423
 304650.0
+ima/img (9).jpg
+False
+333.0
+201.0
+268
+40514.0
