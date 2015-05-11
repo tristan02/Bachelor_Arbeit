@@ -80,7 +80,7 @@ def build_mask(img):
     #blur = cv2.bilateralFilter(mask,10,150,150)
     return mask_inv,centroide,area
 
-#cv2.imwrite('mezcla.jpg', dst)
+#cv2.imwrite('mezcla.jpg', dst)'''
 '''
 for i in range(100):
     path = 'ima/img (' + str(i+1) + ').jpg'
@@ -95,7 +95,7 @@ for i in range(100):
     
     #x,y,mn = match(img_g)
     
-    img_z,centroide = get_mask(img)
+    img_z,centroide,a = build_mask(img)
     cv2.imshow('output',img_z)   
     cv2.waitKey()
     

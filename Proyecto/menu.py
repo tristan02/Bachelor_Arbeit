@@ -41,6 +41,7 @@ class MenuDemo(ttk.Frame):
     dist03 = 0
     index_but_act = 0
     count_buts = 0
+    name_but_act = ''
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
@@ -83,34 +84,36 @@ class MenuDemo(ttk.Frame):
         btn_new_but.focus()
         btn_new_but.pack(side=RIGHT)
         
+        
         #Frame para mariposa actual
         Central = Frame(name='panel central')
         Central.pack()        
+        
+        self.lb_name_but = Label(Central, text=str(self.name_but_act), wraplength='4i')
+                
         self.btn_act_but = Button(Central,name='btn_act_but', image=self.no_img, default=ACTIVE, command=self.edit_but)
         self.btn_act_but.image = imh
         self.btn_act_but.focus()
-        #self.btn_act_but.pack(side=BOTTOM)
         
         im = Image.open('next.png')
         imn = ImageTk.PhotoImage(im)
         self.btn_next_but = Button(Central,name='btn_next_but', image=imn, default=ACTIVE, command=self.next_but)
         self.btn_next_but.image = imn
         self.btn_next_but.focus()
-        #self.btn_next_but.pack(side= RIGHT)
         
         im = Image.open('prev.png')
         imn = ImageTk.PhotoImage(im)
         self.btn_prev_but = Button(Central,name='btn_prev_but', image=imn, default=ACTIVE, command=self.prev_but)
         self.btn_prev_but.image = imn
         self.btn_prev_but.focus()
-        #self.btn_prev_but.pack(side= LEFT)
         
         self.lb_num_but = Label(Central, text=str(self.index_but_act) +' de '+ str(self.count_buts), wraplength='4i')
         
-        self.btn_prev_but.grid(row=0, column=1)
-        self.btn_act_but.grid(row=0, column=2)
-        self.btn_next_but.grid(row=0, column=3)
-        self.lb_num_but.grid(row=1, column=2)
+        self.lb_name_but.grid(row=0,column=2)
+        self.btn_prev_but.grid(row=1, column=1)
+        self.btn_act_but.grid(row=1, column=2)
+        self.btn_next_but.grid(row=1, column=3)
+        self.lb_num_but.grid(row=2, column=2)
         
         #Frame para seleccion de coleciones existenetes
         self.Colecciones = Frame(name='colecciones')
@@ -228,7 +231,6 @@ class MenuDemo(ttk.Frame):
     def new_col(self):
         if self._instance_new_col == None:
             self.dialog_new_col()
-            '''self.update_cols()'''
             
     def show_info_col(self):
         '''TODO: Opciones para eliminar/editar una coleccion a parte de mostrar informacion etc'''
@@ -252,11 +254,14 @@ class MenuDemo(ttk.Frame):
             self.index_but_act = 0 
             self.count_buts = len(buts)-1
             self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
+            self.lb_name_but.config(text=self.but_act.get_name())
         else:
+            self.but_act = Null
             self.buts = buts
             self.update_frame_but(buts)
             self.index_but_act = 0 
             self.count_buts = 0
+            self.lb_name_but.config(text='')
         
     def next_but(self):
         if not(self.estudio) and self.but_act != Null:
@@ -270,6 +275,7 @@ class MenuDemo(ttk.Frame):
                 self.but_act = self.buts[self.index_but_act]  
                 print str(self.but_act.get_dist03()) 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+                self.lb_name_but.config(text=self.but_act.get_name())
             except TclError:
                 pass 
         
@@ -280,9 +286,10 @@ class MenuDemo(ttk.Frame):
                     self.index_but_act = self.index_but_act - 1
                 else:
                     self.index_but_act = self.count_buts
-                self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
+                self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))                
                 self.but_act = self.buts[self.index_but_act] 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
+                self.lb_name_but.config(text=self.but_act.get_name())
             except TclError:
                 pass 
         
@@ -358,10 +365,20 @@ class MenuDemo(ttk.Frame):
     def bad_dist03(self):
         pass
         '''TODO'''
-            
+    
+    #Actualiza la imagen del frame central al insertar nueva mariposa.       
     def update_frame_new_but(self,img):
         self.btn_act_but.config(image=img,fg='red', text='Mariposa pendiente de estudio')          
-        self.btn_act_but['compound'] = BOTTOM  
+        self.btn_act_but['compound'] = BOTTOM 
+    
+    #Cambia del tiron a la coleccion y a la mariposa que le pasamos como argumento 
+    def set_frame_central(self,but): 
+        self.win_similar_buts.destroy()
+        col,index = self.db.get_col_from_but(but)
+        self.set_col(col)
+        self.show_buts(self.db.get_buts_col(col))
+        for i in range(index):
+            self.next_but()
     
     #Actualizamos el frame central con una nueva imagen y quitamos la etqiqueta 'en estudio' en caso de que ya no sea precisa    
     def update_frame_but(self,img):
@@ -377,6 +394,10 @@ class MenuDemo(ttk.Frame):
         path = self.get_path(b)
         self.db.load_db(path)
         self.refresh_grid()        
+        
+    #==============================================================================================================
+    #FUNCIONES DE DIALOGOS
+    #==============================================================================================================
         
     
     #Funcion para el dialogo para crear una nueva coleccion. Tenemos la opcion de subir tambien una foto que se guardara en el objeto collecion
@@ -414,15 +435,12 @@ class MenuDemo(ttk.Frame):
         self.update_cols(nom)
         self.win_new_col.destroy() 
         self.win_new_col = None
+        self.lb_name_but.config(text='')
         
     def foto_col(self):
         f = str(askopenfile())
         path = get_path(f)
         self.img = np.array(Image.open(path))      
-        
-    #==============================================================================================================
-    #FUNCIONES DE DIALOGOS
-    #==============================================================================================================
     
     def dialog_edit_but(self):
         self.win_new_but = Toplevel()
@@ -469,6 +487,7 @@ class MenuDemo(ttk.Frame):
             self._instance_but_act = None
             self.estudio = False
             self.win_new_but.destroy()
+            self.set_col(self.col_act)
                             
     def comparar(self):
         '''TODO:Bastante curro'''
@@ -528,7 +547,7 @@ class MenuDemo(ttk.Frame):
         self.btn_sim_buts = {}
         index = 0
         for elem in buts:
-            action = lambda x = elem: self.dialog(x)
+            action = lambda x = elem: self.set_frame_central(x)
             self.btn_sim_buts[index] = Button(fr_similar_buts, image=elem.get_min_img(), command=action)
             self.btn_sim_buts[index].pack()
             index = index + 1

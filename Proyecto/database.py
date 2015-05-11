@@ -97,6 +97,17 @@ class database:
             
         return buts
     
+    def get_col_from_but(self, but):
+        cols = self.get_cols()
+        
+        for col in cols:
+            buts_col = self.get_buts_col(col)
+            i = 0
+            for elem in buts_col:
+                if elem == but:
+                    return col,i 
+                i = i + 1
+    
     def get_info_col(self,col_act):
         for elem in self.data_collection:
             if col_act == elem.get_name():
