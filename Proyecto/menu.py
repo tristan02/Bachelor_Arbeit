@@ -431,13 +431,13 @@ class MenuDemo(ttk.Frame):
         self.win_new_but.title('Editar...')
         self.frame_options_but.pack()
         
-        label = Label(self.frame_options_but, text="Opciones:")
+        lb_opc = Label(self.frame_options_but, text="Opciones:")
         if self.estudio:        
             self.ins_but = Button(self.frame_options_but, text="Insertar en base de datos", width=25, command=self.insert_but)
             self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=25, command=self.show_hist)
             self.del_but = Button(self.frame_options_but, text="Descartar mariposa", width=25, command=self.delete_but) 
                        
-            label.grid(row=0, column=0)        
+            lb_opc.grid(row=0, column=0)        
             self.ins_but.grid(row=1, column=0)
             self.sh_hist.grid(row=2, column=0)
             self.del_but.grid(row=3, column=0)
@@ -445,13 +445,15 @@ class MenuDemo(ttk.Frame):
             self.buts_col = Button(self.frame_options_but, text="Mostrar mariposas de color parecido", width=35, command=self.comp_color)
             self.buts_shape = Button(self.frame_options_but, text="Mostrar mariposas de forma parecida", width=35, command=self.comparar)
             self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=35, command=self.show_hist)
+            self.sh_msk = Button(self.frame_options_but, text="Mostrar mascara", width=35, command=self.show_msk)
             self.del_but = Button(self.frame_options_but, text="Eliminar mariposa", width=35, command=self.delete_but) 
                        
-            label.grid(row=0, column=0)        
+            lb_opc.grid(row=0, column=0)        
             self.buts_col.grid(row=1, column=0)
             self.buts_shape.grid(row=2, column=0)
             self.sh_hist.grid(row=3, column=0)
-            self.del_but.grid(row=4, column=0)
+            self.sh_msk.grid(row=4, column=0)
+            self.del_but.grid(row=5, column=0)
         
         MenuDemo._instance_but_act = self
             
@@ -474,7 +476,6 @@ class MenuDemo(ttk.Frame):
         self.win_new_but.destroy()
         
     def comp_color(self):
-        'TODO.. comparar todos los histogramas con el de la mariposa actual'
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
         h1 = self.but_act.get_hist()
@@ -483,17 +484,62 @@ class MenuDemo(ttk.Frame):
             buts = self.db.get_buts_col(self.col_act)
         else:
             buts = self.db.get_buts()            
-        aux = 9999999999
-        similar_buts = []
-        most = None
+        vals = []
+        some = False  
+        #Las mariposas que se pasen de 1000 les ponemos valor negativo      
         for elem in buts:
-            if compare_hist(h1,elem.get_hist()) < aux and self.but_act != elem:
-                aux = compare_hist(h1,elem.get_hist())
-                print aux
-                similar_buts.append(elem)
-                most = elem
+            if self.but_act != elem and compare_hist(h1,elem.get_hist()) < 1000:
+                vals.append(compare_hist(h1,elem.get_hist()))
+                some = True
+            else:
+                vals.append(-1)
+        #Ordenamos los arrays de mayor parecido a menos
+        count = len(vals) 
+        vals_neg = 0
+        for i in range(count):       
+            if vals[i] == -1:
+                vals_neg = vals_neg + 1
+        vals, buts = bubbleSort(vals, buts)
+                
+        #Eliminamos las posiciones negativas del array
+        for i in range(vals_neg):
+            del vals[0]
+            del buts[0]
         
-        cv2.imshow('La mas parecida', most.get_hist_img())
+        if (some):    
+            self.show_similar_buts('Color',buts,vals)
+        else:
+            tkMessageBox.showwarning('Comparacion por color', 'No se encontro ninguna mariposa parecida!')
+        
+    def show_similar_buts(self,tipo,buts,vals):       
+        
+        self.win_similar_buts= Toplevel()
+        
+        self.canvas=Canvas(self.win_similar_buts)
+        fr_similar_buts = Frame(self.canvas)
+        myscrollbar=Scrollbar(self.win_similar_buts,orient="vertical",command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=myscrollbar.set)
+        
+        myscrollbar.pack(side="right",fill="y")
+        self.canvas.pack(side="left")
+        self.canvas.create_window((0,0),window=fr_similar_buts,anchor='nw')
+        fr_similar_buts.bind("<Configure>",self.myfunction)
+        
+        self.btn_sim_buts = {}
+        index = 0
+        for elem in buts:
+            action = lambda x = elem: self.dialog(x)
+            self.btn_sim_buts[index] = Button(fr_similar_buts, image=elem.get_min_img(), command=action)
+            self.btn_sim_buts[index].pack()
+            index = index + 1
+            
+    def myfunction(self,event):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=345,height=560)        
+        
+    def show_msk(self):
+        MenuDemo._instance_but_act = None
+        self.win_new_but.destroy()
+        cv2.imshow('Mascara', self.but_act.get_mask())
         
         
         
@@ -532,7 +578,20 @@ def get_path(s):
             p = p[:aux]
             break
         aux += 1
-    return p            
+    return p 
+           
+def bubbleSort(lista,lista2):
+    comparaciones = 0
+    n = len(lista)
+ 
+    for i in xrange(1, n):
+        for j in xrange(n-i):
+            comparaciones += 1
+ 
+            if lista[j] > lista[j+1]:
+                lista[j], lista[j+1] = lista[j+1], lista[j]
+                lista2[j], lista2[j+1] = lista2[j+1], lista2[j]
+    return lista,lista2
          
 if __name__ == '__main__':
     MenuDemo().mainloop()

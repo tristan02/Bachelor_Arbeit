@@ -82,8 +82,11 @@ class database:
         return cols
     
     def get_buts_col(self,col):
-        i = self.data_checked[col]
-        return i
+        buts = []
+        for elem in self.data_checked[col]:
+            buts.append(elem)
+            
+        return buts
     
     def get_buts(self):
         cols = self.get_cols()

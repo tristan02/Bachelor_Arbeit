@@ -1,5 +1,5 @@
-5
-Asia
+4
+False
 Europa
 Theresia es una de las mas importantes. Estaba claro
 
@@ -32,7 +32,7 @@ True
 199.0
 208
 95137.5
-ima/img (29).jpg
+ima/img (97).jpg
 True
 341.0
 204.0
@@ -54,13 +54,13 @@ True
 199.0
 208
 95137.5
-ima/img (25).jpg
+ima/img (14).jpg
 True
 341.0
 204.0
 152
 93566.5
-ima/img (34).jpg
+ima/img (96).jpg
 False
 334.0
 207.0
@@ -69,50 +69,10 @@ False
 False
 Asia centralAhora se lia el taco!!
 
-3
-ima/img (1).jpg
-True
-326.0
-199.0
-208
-95137.5
-ima/img (2).jpg
+1
+ima/img (98).jpg
 True
 341.0
 204.0
 152
 93566.5
-ima/img (3).jpg
-False
-334.0
-207.0
-236
-69492.0
-Pruebas de color
-Vamos a ver si funciona
-
-4
-ima/img (5).jpg
-False
-337.0
-195.0
-202
-75467.5
-ima/img (12).jpg
-False
-339.0
-191.0
-199
-108407.0
-ima/img (45).jpg
-False
-339.0
-226.0
-423
-304650.0
-ima/img (9).jpg
-False
-333.0
-201.0
-268
-40514.0
