@@ -1,27 +1,5 @@
-5
-Alaska
+4
 Europa
-Theresia es una de las mas importantes. Estaba claro
-
-3
-ima/img (11).jpg
-True
-326.0
-199.0
-208
-95137.5
-ima/img (21).jpg
-True
-341.0
-204.0
-152
-93566.5
-ima/img (15).jpg
-False
-338.0
-196.0
-421
-64968.5
 Asia
 Ahora se lia el taco!!
 
@@ -50,10 +28,10 @@ False
 199.0
 208
 95137.5
-Europe
+Europa
 Theresia es una de las mas importantes. Estaba claro
 
-2
+3
 ima/img (14).jpg
 True
 341.0
@@ -66,7 +44,13 @@ False
 207.0
 236
 69492.0
+ima/img (11).jpg
 False
+334
+192
+197
+103012.5
+Africa
 Asia centralAhora se lia el taco!!
 
 1
@@ -75,10 +59,27 @@ True
 341.0
 204.0
 152
-93566.5
-Alaska
+93566.0
+America
 
 
-1
-ima/img (46).jpg
+
+3
+ima/img (63).jpg
 False
+351
+195
+240
+42419.5
+ima/img (62).jpg
+False
+301
+207
+319
+36443.5
+ima/img (89).jpg
+False
+341
+206
+221
+71183.5

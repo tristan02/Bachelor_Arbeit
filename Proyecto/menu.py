@@ -67,6 +67,7 @@ class MenuDemo(ttk.Frame):
         #Frame para opciones
         Tareas = Frame(name='tareas',padx=20,pady=20)
         Tareas.pack()
+        
         #Button collection
         im = Image.open('upload.jpg')
         imh = ImageTk.PhotoImage(im)
@@ -74,7 +75,8 @@ class MenuDemo(ttk.Frame):
         btn_new_col.image = imh
         btn_new_col['compound'] = LEFT
         btn_new_col.focus()
-        btn_new_col.pack(side=LEFT)        
+        btn_new_col.pack(side=LEFT)   
+             
         #Button nueva mariposa
         im = Image.open('new.png')
         imh = ImageTk.PhotoImage(im)
@@ -82,8 +84,7 @@ class MenuDemo(ttk.Frame):
         btn_new_but.image = imh
         btn_new_but['compound'] = LEFT
         btn_new_but.focus()
-        btn_new_but.pack(side=RIGHT)
-        
+        btn_new_but.pack(side=RIGHT)        
         
         #Frame para mariposa actual
         Central = Frame(name='panel central')
@@ -115,6 +116,13 @@ class MenuDemo(ttk.Frame):
         self.btn_next_but.grid(row=1, column=3)
         self.lb_num_but.grid(row=2, column=2)
         
+        #Frame para la coleccion actual
+        self.Coleccion = Frame(name='coleccion_actual')
+        self.Coleccion.pack()
+        self.btn_act_col = Button(self.Coleccion,name='btn_act_col', width=20, text='Coleccion actual: '+self.col_act, default=ACTIVE, command=self.dialog_edit_col)
+        self.btn_act_col.focus()
+        self.btn_act_col.pack(side=BOTTOM,padx=25, pady=25)
+        
         #Frame para seleccion de coleciones existenetes
         self.Colecciones = Frame(name='colecciones')
         self.Colecciones.pack()
@@ -127,14 +135,6 @@ class MenuDemo(ttk.Frame):
             self.btn_cols[i].pack()
         self.col_act = '-'
         
-        #Frame para la coleccion actual
-        self.Coleccion = Frame(name='coleccion_actual')
-        self.Coleccion.pack()
-        self.btn_act_col = Button(self.Coleccion,name='btn_act_col', width=20, text='Coleccion actual: '+self.col_act, default=ACTIVE, command=self.show_info_col)
-        self.btn_act_col.focus()
-        self.btn_act_col.pack(side=BOTTOM,padx=25, pady=25)
-              
-                 
         # create statusbar
         statusBar = Frame()
         self.__status = Label(self.master, text=' ', borderwidth=1,font=('Helv 10'), name='status')
@@ -178,14 +178,14 @@ class MenuDemo(ttk.Frame):
     #estudiando un especimen nuevo, nos preguntara si queremos descartar dicho item.
     def set_col(self,col): 
         self.col_act = col
-        self.btn_act_col.config(text='Coleccion actual: '+self.col_act,bg = "firebrick3")
+        self.btn_act_col.config(text='Coleccion actual: '+self.col_act,bg = "firebrick3",fg='white')
         if not(self.estudio):
             self.show_buts(self.db.get_buts_col(col))
     
     #Una vez creada una nueva coleccion, creamos un nuevo boton con el nombre de la nueva coleccion.    
-    def update_cols(self,n):        
-        btn_new_col = Button(self.Colecciones,name=n.lower(),text=n,default=ACTIVE, width=20, command=lambda:self.set_col(n))
-        btn_new_col.pack()
+    def update_cols(self,n): 
+        self.btn_cols[n] = Button(self.Colecciones,name=n.lower(),text=n,default=ACTIVE, width=20, command=lambda:self.set_col(n))      
+        self.btn_cols[n].pack()
         self.Colecciones.pack()
         self.set_col(n)
         '''TODO
@@ -234,6 +234,7 @@ class MenuDemo(ttk.Frame):
             
     def show_info_col(self):
         '''TODO: Opciones para eliminar/editar una coleccion a parte de mostrar informacion etc'''
+        self.win_edit_col.destroy()
         if not(self.col_act == '-'):
             (info,img) = self.db.get_info_col(self.col_act)
             tkMessageBox._show(self.col_act, info)
@@ -261,6 +262,7 @@ class MenuDemo(ttk.Frame):
             self.update_frame_but(buts)
             self.index_but_act = 0 
             self.count_buts = 0
+            self.lb_num_but.config(text='0 de 0')
             self.lb_name_but.config(text='')
         
     def next_but(self):
@@ -440,13 +442,69 @@ class MenuDemo(ttk.Frame):
     def foto_col(self):
         f = str(askopenfile())
         path = get_path(f)
-        self.img = np.array(Image.open(path))      
+        self.img = np.array(Image.open(path))    
+        
+        
+    def dialog_edit_col(self):
+        self.win_edit_col= Toplevel()
+        self.win_edit_col.protocol("WM_DELETE_WINDOW", "onexit")
+        self.frame_options_col = Frame(self.win_edit_col,padx=20,pady=20)
+        self.win_edit_col.title('Editar coleccion...')
+        self.frame_options_col.pack()
+        
+        self.ins_but = Button(self.frame_options_col, text="Descripcion", width=25, command=self.show_info_col)
+        self.sh_hist = Button(self.frame_options_col, text="Renombrar coleccion", width=25, command=self.rename_col)
+        self.del_but = Button(self.frame_options_col, text="Eliminar coleccion", width=25, command=self.delete_col) 
+         
+        lb_opc = Label(self.frame_options_col, text="Opciones:")           
+        lb_opc.grid(row=0, column=0)        
+        self.ins_but.grid(row=1, column=0)
+        self.sh_hist.grid(row=2, column=0)
+        self.del_but.grid(row=3, column=0)
+        
+    def delete_col(self):
+        self.win_edit_col.destroy()
+        if self.db.get_buts_col(self.col_act) != []:
+            s = tkMessageBox.askquestion(None, "Esta seguro que quiere eliminar permanentemente esta coleccion con todas las mariposas que contiene?")
+            if s == 'yes':
+                self.db.del_col(self.col_act)
+                self.btn_cols[self.col_act].destroy()
+                self.set_col('')
+        else:
+            self.db.del_col(self.col_act)
+            self.btn_cols[self.col_act].destroy()
+            self.set_col('')
+            
+    def rename_col(self):
+        self.win_rename_col = Toplevel()
+        fr_rename_col = Frame(self.win_rename_col,padx=20,pady=20)
+        self.win_rename_col.title('Renombrar coleccion...')
+        fr_rename_col.pack()
+        
+        lb_rename_col = Label(fr_rename_col, text='Nuevo nombre:  ')
+        self.ent_rename_col = Entry(fr_rename_col, bd =5)
+        btn_rename_col = Button(fr_rename_col, text='OK', width=10, command=self.rename_col_event)
+        
+        lb_rename_col.grid(row=0, column=0)        
+        self.ent_rename_col.grid(row=0, column=1)
+        btn_rename_col.grid(row=0, column=2)
+        
+    def rename_col_event(self):
+        n_name = self.ent_rename_col.get()
+        self.win_rename_col.destroy()
+        self.win_edit_col.destroy()
+        self.db.rename_col(self.col_act,n_name)           
+        self.btn_cols[self.col_act].destroy()   
+        action = lambda x = n_name: self.set_col(x)    
+        self.btn_cols[n_name] = Button(self.Colecciones, text=n_name, width=20,command=action) 
+        self.btn_cols[n_name].pack()        
+        self.set_col(n_name)
     
     def dialog_edit_but(self):
         self.win_new_but = Toplevel()
         self.win_new_but.protocol("WM_DELETE_WINDOW", "onexit")
         self.frame_options_but = Frame(self.win_new_but,name='dialog_edit',padx=20,pady=20)
-        self.win_new_but.title('Editar...')
+        self.win_new_but.title('Editar mariposa...')
         self.frame_options_but.pack()
         
         lb_opc = Label(self.frame_options_but, text="Opciones:")

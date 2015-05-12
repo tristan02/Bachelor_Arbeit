@@ -61,6 +61,25 @@ class database:
         valor.remove(but)
         self.data_checked[col] = valor
         
+    def del_col(self,col):
+        for elem in self.data_collection:
+            if elem.get_name() == col:
+                self.data_collection.remove(elem)
+                break
+        del self.data_checked[col]
+        
+    def rename_col(self,col,n_name):
+        aux = 0
+        for elem in self.data_collection:
+            if elem.get_name() == col:
+                self.data_collection[aux].set_name(n_name)
+                break
+            aux = aux + 1
+        
+        self.data_checked[n_name] = self.data_checked[col]
+        del self.data_checked[col]
+
+        
     def new_col(self,col):
         new = True
         for elem in self.data_collection:
@@ -83,9 +102,9 @@ class database:
     
     def get_buts_col(self,col):
         buts = []
-        for elem in self.data_checked[col]:
-            buts.append(elem)
-            
+        if col != '':
+            for elem in self.data_checked[col]:
+                buts.append(elem)            
         return buts
     
     def get_buts(self):

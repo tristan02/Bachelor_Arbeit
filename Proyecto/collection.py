@@ -33,3 +33,6 @@ class collection:
     
     def set_id(self,i):
         self.id = i
+        
+    def set_name(self,n):
+        self.name = n
