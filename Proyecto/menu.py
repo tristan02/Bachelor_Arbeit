@@ -42,6 +42,9 @@ class MenuDemo(ttk.Frame):
     index_but_act = 0
     count_buts = 0
     name_but_act = ''
+    x_d0 = -1
+    x_d3 = -1
+    count_click = 0
      
     def __init__(self, name='menu'):        
         ttk.Frame.__init__(self, name=name)
@@ -340,21 +343,22 @@ class MenuDemo(ttk.Frame):
         
         self.win_dist03 = Toplevel()
         #self.win_dist03.protoco("WM_DELETE_WINDOW", "onexit")
-        frame_dist03_img = Frame(self.win_dist03)
-        frame_dist03_dialog = Frame(self.win_dist03)
+        fr_dist03_img = Frame(self.win_dist03)
+        self.fr_dist03_dialog = Frame(self.win_dist03)
               
-        frame_dist03_img.pack(side = BOTTOM)
-        frame_dist03_dialog.pack(side = TOP)
+        fr_dist03_img.pack(side = BOTTOM)
+        self.fr_dist03_dialog.pack(side = TOP)
         
-        lbl_img_dist03 = Label(frame_dist03_img, image=imh)
+        lbl_img_dist03 = Label(fr_dist03_img, image=imh)
         lbl_img_dist03.image = imh
+        lbl_img_dist03.bind("<Button-1>", self.callback)
         lbl_img_dist03.pack(side = "bottom", fill = "both", expand = "yes")
         
-        lbl_description_dist03 = Label(frame_dist03_dialog, text='Deberian verse dos puntos azules. Uno en el 0 y otro en el 3 de la regla.')
+        lbl_description_dist03 = Label(self.fr_dist03_dialog, text='Deberian verse dos puntos azules. Uno en el 0 y otro en el 3 de la regla.')
         lbl_description_dist03.grid(row=0)
         
-        btn_yes_dist03 = Button(frame_dist03_dialog, name='btn_yes_dist03', text = 'Se muestran correctamente',bg = "green", default=ACTIVE, command=self.good_dist03)
-        btn_no_dist03 = Button(frame_dist03_dialog, name='btn_no_dist03', text = 'No se muestran correctamente',bg = "red", command=self.bad_dist03)
+        btn_yes_dist03 = Button(self.fr_dist03_dialog, name='btn_yes_dist03', text = 'Se muestran correctamente',bg = "green", default=ACTIVE, command=self.good_dist03)
+        btn_no_dist03 = Button(self.fr_dist03_dialog, name='btn_no_dist03', text = 'No se muestran correctamente',bg = "red", command=self.bad_dist03)
         btn_yes_dist03.grid(row=1, column=0)
         btn_no_dist03.grid(row=1, column=1)
         
@@ -365,13 +369,33 @@ class MenuDemo(ttk.Frame):
         self.but_act.set_dist03(self.dist03)
    
     def bad_dist03(self):
-        pass
-        '''TODO'''
+        self.fr_dist03_dialog.destroy()
+        fr_dist03_correct = Frame(self.win_dist03)
+        fr_dist03_correct.pack(side = BOTTOM)
+        labelfont = ('times', 20, 'bold')
+        lbl_correct_dist03 = Label(fr_dist03_correct,font=labelfont, text = 'Haga CLICK primero en el CERO y duespues en el TRES.',fg='red')
+        lbl_correct_dist03.pack()
+         
+    def callback(self,event):
+        if self.count_click == 0:
+            self.x_d0 = event.x
+            self.count_click = self.count_click + 1
+        elif self.count_click == 1:
+            self.x_d3 = event.x
+            self.dist03 = self.x_d3 - self.x_d0
+            self.but_act.set_dist03(self.dist03)  
+            self.win_dist03.destroy()
+            self.count_click = 0 
+            self.x_d0 = -1
+            self.x_d3 = -1 
+            print str(self.dist03)  
     
     #Actualiza la imagen del frame central al insertar nueva mariposa.       
     def update_frame_new_but(self,img):
         self.btn_act_but.config(image=img,fg='red', text='Mariposa pendiente de estudio')          
-        self.btn_act_but['compound'] = BOTTOM 
+        self.btn_act_but['compound'] = BOTTOM
+        self.lb_name_but.config(text='')
+        self.lb_num_but.config(text='0 de 0')
     
     #Cambia del tiron a la coleccion y a la mariposa que le pasamos como argumento 
     def set_frame_central(self,but): 
@@ -390,12 +414,12 @@ class MenuDemo(ttk.Frame):
             self.btn_act_but.config(image=self.no_img)
         if not(self.estudio):
             self.btn_act_but.config(text='')
-        
+    
+    #Carga una nueva base de datos a partir de un archivo de texto    
     def load_db(self):
         b = str(askopenfile())
         path = self.get_path(b)
-        self.db.load_db(path)
-        self.refresh_grid()        
+        self.db.load_db(path)       
         
     #==============================================================================================================
     #FUNCIONES DE DIALOGOS
@@ -447,7 +471,6 @@ class MenuDemo(ttk.Frame):
         
     def dialog_edit_col(self):
         self.win_edit_col= Toplevel()
-        self.win_edit_col.protocol("WM_DELETE_WINDOW", "onexit")
         self.frame_options_col = Frame(self.win_edit_col,padx=20,pady=20)
         self.win_edit_col.title('Editar coleccion...')
         self.frame_options_col.pack()
@@ -481,6 +504,8 @@ class MenuDemo(ttk.Frame):
         self.win_rename_col.title('Renombrar coleccion...')
         fr_rename_col.pack()
         
+        self.win_edit_col.destroy()
+        
         lb_rename_col = Label(fr_rename_col, text='Nuevo nombre:  ')
         self.ent_rename_col = Entry(fr_rename_col, bd =5)
         btn_rename_col = Button(fr_rename_col, text='OK', width=10, command=self.rename_col_event)
@@ -492,7 +517,6 @@ class MenuDemo(ttk.Frame):
     def rename_col_event(self):
         n_name = self.ent_rename_col.get()
         self.win_rename_col.destroy()
-        self.win_edit_col.destroy()
         self.db.rename_col(self.col_act,n_name)           
         self.btn_cols[self.col_act].destroy()   
         action = lambda x = n_name: self.set_col(x)    
@@ -519,7 +543,7 @@ class MenuDemo(ttk.Frame):
             self.del_but.grid(row=3, column=0)
         else:
             self.buts_col = Button(self.frame_options_but, text="Mostrar mariposas de color parecido", width=35, command=self.comp_color)
-            self.buts_shape = Button(self.frame_options_but, text="Mostrar mariposas de forma parecida", width=35, command=self.comparar)
+            self.buts_shape = Button(self.frame_options_but, text="Mostrar mariposas de forma parecida", width=35, command=self.comp_shape)
             self.sh_hist = Button(self.frame_options_but, text="Mostrar histograma", width=35, command=self.show_hist)
             self.sh_msk = Button(self.frame_options_but, text="Mostrar mascara", width=35, command=self.show_msk)
             self.del_but = Button(self.frame_options_but, text="Eliminar mariposa", width=35, command=self.delete_but) 
@@ -547,10 +571,43 @@ class MenuDemo(ttk.Frame):
             self.win_new_but.destroy()
             self.set_col(self.col_act)
                             
-    def comparar(self):
-        '''TODO:Bastante curro'''
+    def comp_shape(self):
+        '''TODO'''
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
+        
+        c1 = self.but_act.get_cnt()
+        s = tkMessageBox.askquestion(None, "Desea buscar similitudes con este ejemplar solo en la coleccion: "+self.col_act+'?')
+        if s == 'yes':
+            buts = self.db.get_buts_col(self.col_act)
+        else:
+            buts = self.db.get_buts() 
+        vals = []
+        some = False  
+        #Las mariposas que se pasen de 1000 les ponemos valor negativo      
+        for elem in buts:
+            if self.but_act != elem and cv2.matchShapes(c1,elem.get_cnt(),1,0.0) < 0.06:
+                vals.append(cv2.matchShapes(c1,elem.get_cnt(),1,0.0))
+                some = True
+            else:
+                vals.append(-1)
+        #Ordenamos los arrays de mayor parecido a menos
+        count = len(vals) 
+        vals_neg = 0
+        for i in range(count):       
+            if vals[i] == -1:
+                vals_neg = vals_neg + 1
+        vals, buts = bubbleSort(vals, buts)
+                
+        #Eliminamos las posiciones negativas del array
+        for i in range(vals_neg):
+            del vals[0]
+            del buts[0]
+        
+        if (some):    
+            self.show_similar_buts('Color',buts,vals)
+        else:
+            tkMessageBox.showwarning('Comparacion por color', 'No se encontro ninguna mariposa parecida!')
         
     def comp_color(self):
         MenuDemo._instance_but_act = None
@@ -627,11 +684,11 @@ class MenuDemo(ttk.Frame):
             #Cerramos la ventana de opciones
             MenuDemo._instance_but_act = None
             self.win_new_but.destroy()    
-            self.get_dist03_but()
-            '''TODO resize. La cosa es que teniendo la nueva dist 03 ya podemos reescalar toda la base de datos''' 
+            self.get_dist03_but() 
             self.db.new_but(self.but_act,self.col_act)
             self.estudio = False
-            self.update_frame_but(self.but_act.get_min_img())
+            self.show_buts(self.db.get_buts_col(self.col_act))
+            self.prev_but()
             
     def on_closing(self):
         try:

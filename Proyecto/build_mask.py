@@ -78,7 +78,7 @@ def build_mask(img):
     mask_inv = cv2.bitwise_not(mask)
     #TODO aplicar filtro para quitar ruidos
     #blur = cv2.bilateralFilter(mask,10,150,150)
-    return mask_inv,centroide,area
+    return cnt,mask_inv,centroide,area
 
 #cv2.imwrite('mezcla.jpg', dst)'''
 '''

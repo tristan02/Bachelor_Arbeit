@@ -145,7 +145,6 @@ class database:
             if dist > 10:
                 self.d = self.d + dist
             else:
-                ''''TODO Si no se ha detectado bien el 03 hay que hacer algo!'''
                 #self.db.delete_but(but)
                 error = error + 1
         self.d = self.d/(c-error)
@@ -164,7 +163,8 @@ class database:
         return self.col_act
         
     def save_db(self,last_col):
-        file = open('db.txt','w')        
+        file = open('db.txt','w')
+        #Numero de colecciones existentes en la base de datos        
         file.write(str(len(self.get_cols())) + '\n')
         file.write(last_col  + '\n')
                
@@ -197,18 +197,19 @@ class database:
            
             aux = file.readline()
             col_info = ''
-            while (aux != '\n'):
+            while not(isinstance( aux, int )):
                 aux = aux[:len(aux)-1]
                 col_info = col_info + aux
                 aux = file.readline()
+                try:
+                    aux = int(aux)
+                except:
+                    pass
             #col_img = file.readline()            
             col = collection(None,col_name,col_info)
             self.new_col(col)
-            try:
-                num_buts = int(file.readline())
-            except:
-                file.readline()
-                num_buts = int(file.readline())
+            
+            num_buts = aux
                 
             for j in range(num_buts):
                 path = file.readline()

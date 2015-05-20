@@ -27,6 +27,7 @@ class butterfly:
     centroide = (0,0)
     w = 0
     h = 0
+    contorn = []
     
     def __init__(self,img,name):
         self.np_img = img
@@ -39,7 +40,7 @@ class butterfly:
         aux = cv2.resize(img,(self.w/2, self.h/2), interpolation = cv2.INTER_CUBIC)
         self.min_img = ImageTk.PhotoImage(Image.fromarray(aux))
         #Sacamos la mascara, centroide y area
-        self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
+        self.contorn,self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
         #Calculamos el histograma con su imagen
         self.hist_img,self.hist = get_hist(self.np_img,self.mask_img)
     
@@ -79,6 +80,9 @@ class butterfly:
     
     def get_hist(self):
         return self.hist
+    
+    def get_cnt(self):
+        return self.contorn
     
     #Getter de la imagen en np
     def get_np_img(self):
