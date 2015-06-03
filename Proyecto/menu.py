@@ -4,8 +4,8 @@ Created on 24/3/2015
 @author: Psilocibino
 '''
 from Tkinter import *
-import ttk
 from Tkconstants import BOTH, TOP, LEFT, BOTTOM, RIGHT
+import ttk
 import cv2
 import numpy as np
 from Proyecto.butterfly import butterfly
@@ -169,9 +169,7 @@ class MenuDemo(ttk.Frame):
         
     
     # ================================================================================
-         
-       
-            
+    
     def reset_btn_act_but(self):
         im = Image.open('no-image.png')
         imh = ImageTk.PhotoImage(im)
@@ -191,8 +189,6 @@ class MenuDemo(ttk.Frame):
         self.btn_cols[n].pack()
         self.Colecciones.pack()
         self.set_col(n)
-        '''TODO
-        self._add_collection_menu()'''
     
     #Carga una imagen deseada, crea una mariposa, la muestra, pregunta si esta rota y la guarda en la bd
     def load_but(self):
@@ -205,14 +201,10 @@ class MenuDemo(ttk.Frame):
                 #Creamos la mariposa
                 name = 'ima/' + os.path.basename(path)
                 self.but_act = butterfly(i,name)
-                #Preguntamos al usuario si sobre la integridad del ejemplar
-                s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
-                self.but_act.set_broken(s)
+                #Preguntamos al usuario si sobre la integridad del ejemplar TODO
+                #s = tkMessageBox.askquestion("Integridad", "Le falta algun trozo al ejemplar?")        
+                self.but_act.set_broken('no')
                 self.update_frame_new_but(self.but_act.get_min_img())
-                '''if self.db.new_but(self.but_act) == -1:
-                    tkMessageBox.showinfo(None, "La mariposa ya esta en la base de datos o se ha producido un error")
-                else:
-                    tkMessageBox.showinfo(None, "La mariposa ha sido aniadida a la base de datos, pero sin procesar.")'''
             except:
                 self.estudio = False
         else:
@@ -236,13 +228,14 @@ class MenuDemo(ttk.Frame):
             self.dialog_new_col()
             
     def show_info_col(self):
-        '''TODO: Opciones para eliminar/editar una coleccion a parte de mostrar informacion etc'''
+        '''TODO: La informacion se muestra sin imagen. En el boton de coleccion actual no cabe nombres largos.'''
         self.win_edit_col.destroy()
         if not(self.col_act == '-'):
             (info,img) = self.db.get_info_col(self.col_act)
             tkMessageBox._show(self.col_act, info)
         else:
             tkMessageBox.showinfo('None', 'Ninguna coleccion para cargar. Cree una.')
+            
     def close_but(self):
         if self.panel != Null:
             self.panel.destroy()
@@ -278,7 +271,6 @@ class MenuDemo(ttk.Frame):
                        
                 self.lb_num_but.config(text=str(self.index_but_act+1) +' de  '+ str(self.count_buts+1))
                 self.but_act = self.buts[self.index_but_act]  
-                print str(self.but_act.get_dist03()) 
                 self.update_frame_but(self.buts[self.index_but_act].get_min_img())
                 self.lb_name_but.config(text=self.but_act.get_name())
             except TclError:
@@ -298,43 +290,12 @@ class MenuDemo(ttk.Frame):
             except TclError:
                 pass 
         
-    def show_masks(self):        
-        c = self.db.get_count_but()
-        for i in range(c):
-            but = self.db.get_but(i)
-            cv2.imshow(but.get_name(), but.get_mask())
-     
     #De momento abrimos una ventana con el histograma de cada mariposa       
     def show_hist(self):
         cv2.imshow(self.but_act.get_name(), self.but_act.get_hist_img())
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
     
-    'TODO: El reescalado se debe hacer en la base de datos al aniadir nueva mariposa Este metodo sobra'
-    #Para intentar perder la menor informacion posible sobre las imagenes,
-    # el nuevo tamanyo sera segun la media de las distancias
-    def resize(self):
-        d = 0
-        error = 0
-        c = self.db.get_count_but()
-        for i in range(c):
-            but = self.db.get_but(i)
-            #Si la imagen ya ha sido reescalada no buscamos su distancia pues ya la sabemos but.dist03
-            if not(but.get_reescaled()):
-                dist = find_0_3(but.get_np_img())
-            else:
-                dist = but.get_dist03()
-            #Si la medida sale mal la sacamos de la media
-            if dist > 10:
-                d = d + dist
-                but.set_dist03(dist)
-            else:
-                ''''TODO Si no se ha detectado bien el 03 hay que hacer algo!'''
-                #self.db.delete_but(but)
-                error = error + 1
-        d = d/(c-error)
-        self.db.reescale_bd(d)
-        
     def get_dist03_but(self):
         self.dist03,img_03 = find_0_3(self.but_act.get_np_img())
         
@@ -366,7 +327,10 @@ class MenuDemo(ttk.Frame):
         
     def good_dist03(self):
         self.win_dist03.destroy()
-        self.but_act.set_dist03(self.dist03)
+        self.but_act.set_dist03(self.dist03)        
+        self.db.reescale_bd()
+        if (self.search_similiar()):
+                tkMessageBox.showwarning('Mariposas parecidas', 'Compruebe que dicha mariposa no pertenezca ya a la coleccion.')
    
     def bad_dist03(self):
         self.fr_dist03_dialog.destroy()
@@ -384,11 +348,13 @@ class MenuDemo(ttk.Frame):
             self.x_d3 = event.x
             self.dist03 = self.x_d3 - self.x_d0
             self.but_act.set_dist03(self.dist03)  
-            self.win_dist03.destroy()
+            self.win_dist03.destroy()            
             self.count_click = 0 
             self.x_d0 = -1
-            self.x_d3 = -1 
-            print str(self.dist03)  
+            self.x_d3 = -1            
+            self.db.reescale_bd()
+            if (self.search_similiar()):
+                tkMessageBox.showwarning('Mariposas parecidas', 'Compruebe que dicha mariposa no pertenezca ya a la coleccion.')
     
     #Actualiza la imagen del frame central al insertar nueva mariposa.       
     def update_frame_new_but(self,img):
@@ -572,11 +538,11 @@ class MenuDemo(ttk.Frame):
             self.set_col(self.col_act)
                             
     def comp_shape(self):
-        '''TODO'''
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
         
         c1 = self.but_act.get_cnt()
+        a1 = self.but_act.get_area()
         s = tkMessageBox.askquestion(None, "Desea buscar similitudes con este ejemplar solo en la coleccion: "+self.col_act+'?')
         if s == 'yes':
             buts = self.db.get_buts_col(self.col_act)
@@ -586,7 +552,7 @@ class MenuDemo(ttk.Frame):
         some = False  
         #Las mariposas que se pasen de 1000 les ponemos valor negativo      
         for elem in buts:
-            if self.but_act != elem and cv2.matchShapes(c1,elem.get_cnt(),1,0.0) < 0.06:
+            if self.but_act != elem and cv2.matchShapes(c1,elem.get_cnt(),1,0.0) < 0.05 and abs(a1 - elem.get_area()) < 30000 :
                 vals.append(cv2.matchShapes(c1,elem.get_cnt(),1,0.0))
                 some = True
             else:
@@ -605,9 +571,9 @@ class MenuDemo(ttk.Frame):
             del buts[0]
         
         if (some):    
-            self.show_similar_buts('Color',buts,vals)
+            self.show_similar_buts('Forma',buts,vals)
         else:
-            tkMessageBox.showwarning('Comparacion por color', 'No se encontro ninguna mariposa parecida!')
+            tkMessageBox.showwarning('Comparacion por forma', 'No se encontro ninguna mariposa parecida!')
         
     def comp_color(self):
         MenuDemo._instance_but_act = None
@@ -622,8 +588,9 @@ class MenuDemo(ttk.Frame):
         some = False  
         #Las mariposas que se pasen de 1000 les ponemos valor negativo      
         for elem in buts:
-            if self.but_act != elem and compare_hist(h1,elem.get_hist()) < 1000:
-                vals.append(compare_hist(h1,elem.get_hist()))
+            v1,v2,v3 = compare_hist(self.but_act.get_np_img(),self.but_act.get_mask(),elem.get_np_img(),elem.get_mask())
+            if self.but_act != elem and v1 < 20 and v2 < 20 and v3 < 20:
+                vals.append(v1)
                 some = True
             else:
                 vals.append(-1)
@@ -648,6 +615,7 @@ class MenuDemo(ttk.Frame):
     def show_similar_buts(self,tipo,buts,vals):       
         
         self.win_similar_buts= Toplevel()
+        self.win_similar_buts.title("Resultado: Comparacion por "+tipo)
         
         self.canvas=Canvas(self.win_similar_buts)
         fr_similar_buts = Frame(self.canvas)
@@ -673,9 +641,7 @@ class MenuDemo(ttk.Frame):
     def show_msk(self):
         MenuDemo._instance_but_act = None
         self.win_new_but.destroy()
-        cv2.imshow('Mascara', self.but_act.get_mask())
-        
-        
+        cv2.imshow('Mascara', self.but_act.get_mask())   
         
     #Insertamos una nueva mariposa en la base de datos    
     def insert_but(self):
@@ -684,11 +650,48 @@ class MenuDemo(ttk.Frame):
             #Cerramos la ventana de opciones
             MenuDemo._instance_but_act = None
             self.win_new_but.destroy()    
-            self.get_dist03_but() 
+            self.get_dist03_but()
             self.db.new_but(self.but_act,self.col_act)
             self.estudio = False
             self.show_buts(self.db.get_buts_col(self.col_act))
             self.prev_but()
+            
+    def search_similiar(self):
+        
+        h1 = self.but_act.get_hist()
+        c1 = self.but_act.get_cnt()
+        a1 = self.but_act.get_area()
+        buts = self.db.get_buts()            
+        vals = []
+        some = False       
+        
+        for elem in buts:
+            if self.but_act != elem and cv2.matchShapes(c1,elem.get_cnt(),1,0.0) < 0.05 and abs(a1 - elem.get_area()) < 30000 :                
+                v1,v2,v3 = compare_hist(self.but_act.get_np_img(),self.but_act.get_mask(),elem.get_np_img(),elem.get_mask())
+                if self.but_act != elem and v1 < 20 and v2 < 20 and v3 < 20:
+                    vals.append(cv2.matchShapes(c1,elem.get_cnt(),1,0.0))
+                    some = True
+            else:
+                vals.append(-1)      
+
+        #Ordenamos los arrays de mayor parecido a menos
+        count = len(vals) 
+        vals_neg = 0
+        for i in range(count):       
+            if vals[i] == -1:
+                vals_neg = vals_neg + 1
+        vals, buts = bubbleSort(vals, buts)
+                
+        #Eliminamos las posiciones negativas del array
+        for i in range(vals_neg):
+            del vals[0]
+            del buts[0]
+        
+        if (some):    
+            self.show_similar_buts('Forma, Tamanyo y Color',buts,vals)
+            return True
+        else:
+            return False
             
     def on_closing(self):
         try:

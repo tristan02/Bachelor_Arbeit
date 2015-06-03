@@ -1,134 +1,140 @@
 3
-Africa
 Europa
+Europa
+vamos pringaus
 
-
-10
+15
 ima/img (1).jpg
 False
 326.0
 199.0
-144
-95137.5
-ima/img (2).jpg
-False
-341.0
-204.0
-152
-93566.5
-ima/img (3).jpg
-False
-334.0
-207.0
-236
-69492.0
-ima/img (4).jpg
-False
-333.0
-210.0
-260
-78940.0
+141
+272654.0
 ima/img (5).jpg
 False
 337.0
 195.0
 202
-75467.5
-ima/img (6).jpg
+105512.5
+ima/img (71).jpg
 False
-336.0
+306.0
 191.0
-197
-73505.5
-ima/img (7).jpg
+250
+40546.0
+ima/img (72).jpg
 False
-339.0
-194.0
-233
-53833.5
-ima/img (8).jpg
+312.0
+209.0
+259
+38723.0
+ima/img (3).jpg
 False
-338.0
-205.0
-260
-37960.5
+334.0
+207.0
+236
+71416.5
+ima/img (80).jpg
+False
+341.0
+209.0
+225
+78618.5
 ima/img (9).jpg
 False
 333.0
 201.0
 268
-40514.0
-ima/img (45).jpg
-False
-339.0
-226.0
-118
-304650.0
-Asia
-Mariposas mas pequenias y perecederas.Se pueden observar colores mas oscuros.
-
-5
-ima/img (10).jpg
+32393.5
+ima/img (8).jpg
 False
 338.0
-182.0
-195
-76190.5
-ima/img (11).jpg
+205.0
+260
+32215.0
+ima/img (4).jpg
 False
-334.0
-192.0
-197
-103012.5
-ima/img (12).jpg
+333.0
+210.0
+260
+66662.0
+ima/img (7).jpg
 False
 339.0
-191.0
-199
-108407.0
+194.0
+233
+56896.0
 ima/img (13).jpg
 False
 339.0
 188.0
 206
-59038.5
-ima/img (62).jpg
-True
-301.0
-207.0
-276
-36443.5
-Africa
-Que quieresPesao
-
-5
-ima/img (40).jpg
-False
-316.0
-194.0
-331
-39956.0
-ima/img (41).jpg
-False
-328.0
-200.0
-300
-37600.0
-ima/img (42).jpg
+79709.5
+ima/img (18).jpg
 False
 335.0
-199.0
-295
-37976.5
+204.0
+233
+60140.0
+ima/img (19).jpg
+False
+335.0
+202.0
+229
+64904.0
+ima/img (69).jpg
+False
+333.0
+195.0
+233
+88778.5
+ima/img (14).jpg
+False
+338.0
+196.0
+187
+106164.5
+Rodrigo
+Es una malo jugando al fusbol
+
+5
+ima/img (75).jpg
+False
+343.0
+188.0
+255
+66287.5
+ima/img (48).jpg
+False
+340.0
+208.0
+246
+23299.5
 ima/img (79).jpg
 False
 342.0
 193.0
 219
-45038.0
-ima/img (78).jpg
+53985.0
+ima/img (21).jpg
 False
-335.0
-197.0
+344
 217
-43686.0
+299
+35447.0
+ima/img (20).jpg
+False
+349
+203
+278
+33529.5
+la charly
+Es la tia mas rancia que ha
+
+1
+ima/img (70).jpg
+False
+306.0
+193.0
+267
+24577.5

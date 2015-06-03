@@ -24,19 +24,7 @@ class database:
     d = 0
     col_act = '-'
     
-    def __init__(self):
-        '''col1 = collection(None,'Europa','Esta collection es muy completa. Es la hostia.')
-        col2 = collection(None,'Africa','Esta collection es muy completa. Es la hostia.')
-        self.data_collection.append(col1)
-        self.data_collection.append(col2)
-        
-        i = np.array(Image.open('img (2).jpg'))  
-        but1 = butterfly(i,'but1')
-        i = np.array(Image.open('img (3).jpg'))
-        but2 = butterfly(i,'but2')
-        
-        self.data_checked = {col1.get_name():[but1,but2],col2.get_name():[]}'''
-        
+    def __init__(self):     
         try:
             self.load_db('db.txt')
         except:
@@ -51,7 +39,6 @@ class database:
             aux = self.data_checked[col]
             aux.append(but)
             self.data_checked[col] = aux
-            #self.reescale_bd(but.get_dist03())
             return 0
         else:
             return -1
@@ -78,7 +65,6 @@ class database:
         
         self.data_checked[n_name] = self.data_checked[col]
         del self.data_checked[col]
-
         
     def new_col(self,col):
         new = True
@@ -134,56 +120,54 @@ class database:
         return ('0','0')
             
     def reescale_bd(self):
-        self.d = 0
-        error = 0
-        c = self.db.get_count_but()
+        self.d = 0        
+        c = self.get_count_cols()
+        cols = self.get_cols()
+        count = 0
+        #Calculamos la media de todas las dist03
         for i in range(c):
-            but = self.db.get_but(i)
-            #Si la imagen ya ha sido reescalada no buscamos su distancia pues ya la sabemos but.dist03
-            dist = but.get_dist03()
-            #Si la medida sale mal la sacamos de la media
-            if dist > 10:
-                self.d = self.d + dist
-            else:
-                #self.db.delete_but(but)
-                error = error + 1
-        self.d = self.d/(c-error)
+            buts = self.get_buts_col(cols[i])
+            for j in range(len(buts)):
+                but = buts[j]
+                dist = but.get_dist03()
+                self.d = self.d + dist 
+                count = count + 1       
+        self.d = self.d/(count)
         
-        for elem in self.data_checked:
-            if not((elem.get_dist03() + 3) > self.d and (elem.get_dist03() - 3) < self.d):
-                elem.reescale(self.d)
-            if elem.get_centroide() != 0:
-                elem.reescale_mask()
-        print self.d
+        for i in range(c):
+            buts = self.get_buts_col(cols[i])
+            for j in range(len(buts)):
+                but = buts[j]
+                but.reescale(self.d)
     
-    def get_count_but(self):
+    def get_count_cols(self):
         return len(self.data_checked)
         
     def get_col_act(self):
         return self.col_act
         
     def save_db(self,last_col):
-        file = open('db.txt','w')
+        doc = open('db.txt','w')
         #Numero de colecciones existentes en la base de datos        
-        file.write(str(len(self.get_cols())) + '\n')
-        file.write(last_col  + '\n')
+        doc.write(str(len(self.get_cols())) + '\n')
+        doc.write(last_col  + '\n')
                
         for col in self.data_collection:
             buts = self.get_buts_col(col.get_name())                        
-            file.write(col.get_name() + '\n')
-            file.write(col.get_info() + '\n' + '\n')
-            #file.write(col.get_img() + '\n')  
-            file.write(str(len(buts)) + '\n')
+            doc.write(col.get_name() + '\n')
+            doc.write(col.get_info() + '\n' + '\n')
+            #doc.write(col.get_img() + '\n')  
+            doc.write(str(len(buts)) + '\n')
                       
             for elem in buts:               
-                file.write(elem.get_name() + '\n')
-                file.write(str(elem.get_broken()) + '\n')
+                doc.write(elem.get_name() + '\n')
+                doc.write(str(elem.get_broken()) + '\n')
                 x,y = elem.get_centroide()
-                file.write(str(x) + '\n')
-                file.write(str(y) + '\n')
-                file.write(str(elem.get_dist03()) + '\n')
-                file.write(str(elem.get_area()) + '\n')    
-        file.close()
+                doc.write(str(x) + '\n')
+                doc.write(str(y) + '\n')
+                doc.write(str(elem.get_dist03()) + '\n')
+                doc.write(str(elem.get_area()) + '\n')    
+        doc.close()
         
     def load_db(self,path):
         file = open(path, 'r')        
@@ -236,7 +220,8 @@ class database:
                 b.set_area(area)
                 
                 self.new_but(b,col.get_name())
-        
+            
+        self.reescale_bd()        
         return 
             
     def delete_db(self):

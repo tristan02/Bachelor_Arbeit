@@ -8,6 +8,7 @@ import numpy as np
 import ImageTk, Image
 from matplotlib.cbook import Null
 from Proyecto.build_mask import build_mask
+from Proyecto.build_mask import rebuild_moments
 from Proyecto.get_histogram import get_hist
 
 
@@ -18,6 +19,7 @@ class butterfly:
     np_img = Null
     pil_img = Null
     min_img = Null
+    orig_mask_img = Null
     mask_img = Null
     hist_img = Null
     hist = []
@@ -25,9 +27,11 @@ class butterfly:
     dist03 = 0
     area = 0
     centroide = (0,0)
+    orig_w = 0
+    orig_h = 0
     w = 0
     h = 0
-    contorn = []
+    contour = []
     
     def __init__(self,img,name):
         self.np_img = img
@@ -36,43 +40,33 @@ class butterfly:
         self.name = name
         self.w = self.pil_img.width()
         self.h = self.pil_img.height()
+        self.orig_w = self.pil_img.width()
+        self.orig_h = self.pil_img.height()
         #Creamos la imagen en miniatura
         aux = cv2.resize(img,(self.w/2, self.h/2), interpolation = cv2.INTER_CUBIC)
         self.min_img = ImageTk.PhotoImage(Image.fromarray(aux))
         #Sacamos la mascara, centroide y area
-        self.contorn,self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
+        self.contour,self.orig_mask_img,self.centroide,self.area = build_mask(self.orig_img)
+        self.mask_img = self.orig_mask_img
         #Calculamos el histograma con su imagen
         self.hist_img,self.hist = get_hist(self.np_img,self.mask_img)
     
     #A partir de la medida entre el 0 y el 3 que son "3cmm" reescalamos a escala 2:1
     def reescale(self,d):
         k = float(d)/float(self.dist03)
-        self.w = int(self.w*k)
-        self.h = int(self.h*k)
-        self.np_img = cv2.resize(self.np_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
+        self.w = int(self.orig_w*k)
+        self.h = int(self.orig_h*k)
+        self.np_img = cv2.resize(self.orig_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
         self.pil_img = ImageTk.PhotoImage(Image.fromarray(self.np_img))
-        self.reescaled = False
-        #Redefinimos la miniimagen
-        i = cv2.resize(self.np_img,(self.w/4, self.h/4), interpolation = cv2.INTER_CUBIC)
-        self.min_img = ImageTk.PhotoImage(Image.fromarray(i))
-        #Reescalamos la maskara
-        self.reescale_mask()
+        self.mask_img = cv2.resize(self.orig_mask_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
+        self.contour,self.area = rebuild_moments(self.mask_img)
+        self.mask_img = cv2.resize(self.orig_mask_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
     
-    #Basandonos en dist03 reescalamos las maskara
-    'TODO'  
-    def reescale_mask(self):
-        if self.area != 0:
-            self.mask_img = cv2.resize(self.mask_img,(self.w, self.h), interpolation = cv2.INTER_CUBIC)
-            
-    #Dist03 sera la distancia en pixeles que hay entre el 0 y el 3 de la regla      
+    #Dist03 sera la distancia en pixeles que hay entre el 0 y el 3 de la escala metrica      
     def get_dist03(self):
         return self.dist03
-    
-    def set_mask(self):
-        self.mask_img,self.centroide,self.area = build_mask(self.orig_img)
         
     def get_mask(self):
-        #cv2.imwrite(self.name + '_mask.jpg', self.mask_img)
         return self.mask_img
     
     def get_hist_img(self):
@@ -82,7 +76,7 @@ class butterfly:
         return self.hist
     
     def get_cnt(self):
-        return self.contorn
+        return self.contour
     
     #Getter de la imagen en np
     def get_np_img(self):
@@ -107,9 +101,6 @@ class butterfly:
     def get_broken(self):
         return self.broken
     
-    def get_reescaled(self):
-        return self.reescaled
-    
     def get_size(self):
         return self.h,self.w
     
@@ -127,10 +118,6 @@ class butterfly:
             
     def set_area(self,a):
         self.area = a
-    
-    def set_reescaled(self,c):
-        if c == 'True':
-            self.checked = True
     
     #Cambiamos el valor de broken en caso de que la nueva muestra este daada
     def set_broken(self,s):
